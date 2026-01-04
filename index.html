@@ -1,281 +1,892 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video & Game Portal</title>
+    <title>APKsgi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #4a94bb;
-            --secondary-color: #ff6d01;
-            --success-color: #34a853;
-            --dark-color: #2c3e50;
-            --light-color: #f8f9fa;
-            --danger-color: #e74c3c;
+            --primary-color: #6366f1;
+            --secondary-color: #f59e0b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+            --dark-text: #f1f5f9;
+            --dark-border: #334155;
+            --light-bg: #f8fafc;
+            --light-card: #ffffff;
+            --light-text: #1e293b;
+            --light-border: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.15);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.2);
         }
+
+            [data-theme="dark"] {
+              --bg-primary: var(--dark-bg);
+              --bg-card: var(--dark-card);
+              --text-primary: var(--dark-text);
+              --border-color: var(--dark-border);
+
+              --text-muted: rgba(241, 245, 249, 0.7);
+              --nav-text: #f1f5f9;
+              --btn-outline: #f1f5f9;
+            }
+
+            [data-theme="light"] {
+              --bg-primary: var(--light-bg);
+              --bg-card: var(--light-card);
+              --text-primary: var(--light-text);
+              --border-color: var(--light-border);
+
+              --text-muted: rgba(30, 41, 59, 0.65);
+              --nav-text: #0f172a;
+              --btn-outline: #0f172a;
+            }
+
         
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+
+/* Paksa semua teks umum ikut theme */
+body, p, h1, h2, h3, h4, h5, h6, label, small, span, div {
+  color: var(--text-primary);
+}
+
+/* text-muted Bootstrap agar ikut theme */
+.text-muted,
+small.text-muted,
+p.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Navbar text dan link */
+.navbar,
+.navbar .navbar-brand,
+.navbar .nav-link,
+.navbar .navbar-text {
+  color: var(--nav-text) !important;
+}
+
+.navbar .nav-link.active {
+  opacity: 1;
+}
+
+.navbar .nav-link:not(.active) {
+  opacity: 0.85;
+}
+
+/* Icon navbar juga ikut */
+.navbar i {
+  color: var(--nav-text) !important;
+}
+
+/* Tombol outline agar kontras di light dan dark */
+.btn-outline-light,
+.btn-outline-secondary {
+  color: var(--btn-outline) !important;
+  border-color: var(--btn-outline) !important;
+}
+
+.btn-outline-light:hover,
+.btn-outline-secondary:hover {
+  background: var(--btn-outline) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* Card text */
+.card,
+.card .card-title,
+.card .card-text {
+  color: var(--text-primary) !important;
+}
+
+/* Modal text */
+.modal-content,
+.modal-content * {
+  color: var(--text-primary);
+}
+
+/* Input placeholder agar terlihat */
+.form-control::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 1;
+}
+
+/* Select option text */
+select.form-select,
+select.form-select option {
+  color: var(--text-primary) !important;
+  background: var(--bg-card) !important;
+}
+
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            color: #333;
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
         }
-        
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            opacity: 0.05;
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(10px) translateY(10px); }
+        }
+
+        /* Floating Particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 20s infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-100vh) translateX(50px); }
+            50% { transform: translateY(-200vh) translateX(-50px); }
+            75% { transform: translateY(-300vh) translateX(30px); }
+        }
+
+        /* Modern Navbar */
+        .navbar {
+            background: var(--bg-card) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+            border-bottom: 1px solid var(--border-color);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
         .navbar-brand {
-            font-weight: bold;
+            font-weight: 700;
             font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s ease infinite;
         }
-        
-        .card {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-            margin-bottom: 20px;
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--border-color);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             overflow: hidden;
         }
-        
-        .card:hover {
-            transform: translateY(-5px);
+
+        .theme-toggle::before {
+            content: '☀️';
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
         }
-        
-        .card-header {
-            border-radius: 15px 15px 0 0 !important;
-            font-weight: bold;
-            font-size: 1.2rem;
+
+        .theme-toggle::after {
+            content: '🌙';
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
         }
-        
-        .login-container {
-            max-width: 500px;
-            margin: 100px auto;
-            padding: 30px;
+
+        .theme-toggle-slider {
+            position: absolute;
+            width: 24px;
+            height: 24px;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-        
-        .video-thumbnail {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .game-thumbnail {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-        
-        .btn-custom {
-            border-radius: 50px;
-            padding: 10px 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary-custom {
+
+        [data-theme="dark"] .theme-toggle {
             background: var(--primary-color);
-            border: none;
         }
-        
-        .btn-primary-custom:hover {
-            background: #3a7ba3;
-            transform: translateY(-2px);
+
+        [data-theme="dark"] .theme-toggle-slider {
+            transform: translateX(30px);
         }
-        
-        .btn-secondary-custom {
-            background: var(--secondary-color);
-            border: none;
+
+        /* Modern Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
+            font-weight: 600;
+            border: none;
+            padding: 15px 20px;
         }
-        
+
+        /* Modern Buttons */
+        .btn-custom {
+            border-radius: 12px;
+            padding: 12px 28px;
+            font-weight: 600;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .btn-custom::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn-custom:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary-custom {
+            background: linear-gradient(135deg, var(--secondary-color), #f97316);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
         .btn-secondary-custom:hover {
-            background: #e05c00;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        }
+
+        /* Login Modal */
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.4s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 24px 24px 0 0;
+        }
+
+        /* Form Inputs */
+        .form-control {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background: var(--bg-card);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            color: var(--text-primary);
+        }
+
+        .input-group-text {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-right: none;
+            color: var(--text-primary);
+            border-radius: 12px 0 0 12px;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* Video & Game Items */
+        .video-thumbnail, .game-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .video-item:hover .video-thumbnail,
+        .game-item:hover .game-thumbnail {
+            transform: scale(1.05);
+        }
+
+        /* User Info Section */
+        .user-info {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 24px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .user-info::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border: none;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .nav-tabs .nav-link {
+            border: 2px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: var(--primary-color);
             transform: translateY(-2px);
         }
-        
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Badges */
         .badge-category {
             background: var(--success-color);
             color: white;
-            padding: 5px 10px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.8rem;
-        }
-        
-        .video-player {
-            width: 100%;
-            height: 400px;
-            border-radius: 10px;
-            background: #000;
-        }
-        
-        .modal-content {
-            border-radius: 15px;
-            border: none;
-        }
-        
-        .nav-tabs .nav-link {
-            color: var(--dark-color);
             font-weight: 600;
-            border: none;
-            padding: 12px 25px;
-        }
-        
-        .nav-tabs .nav-link.active {
-            background: var(--primary-color);
-            color: white;
-            border-radius: 50px;
-        }
-        
-        .category-badge {
             display: inline-block;
-            margin: 2px;
-            padding: 3px 8px;
-            background: #e8f4fc;
-            border-radius: 10px;
-            font-size: 0.8rem;
+            margin: 4px;
+            animation: fadeIn 0.5s ease;
         }
-        
-        .download-option {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            transition: all 0.3s;
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        
-        .download-option:hover {
-            border-color: var(--primary-color);
-            background: #f8fdff;
-        }
-        
-        .premium-badge {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            color: #333;
-            font-weight: bold;
-            padding: 3px 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-        }
-        
+
+        /* Loader */
         .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary-color);
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
             border-radius: 50%;
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 30px auto;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
+        /* Toast */
         .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            animation: toastSlideIn 0.3s ease;
         }
-        
+
+        @keyframes toastSlideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        /* Locked Content */
+        .locked-placeholder {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(245, 158, 11, 0.1));
+            border: 2px dashed var(--border-color);
+            color: var(--text-primary);
+            padding: 32px;
+            text-align: center;
+            border-radius: 16px;
+            margin: 16px 0;
+            animation: pulse 2s ease infinite;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Screenshot Grid */
         .screenshot-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 16px;
         }
-        
+
         .screenshot-img {
             width: 100%;
-            height: 100px;
+            height: 120px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
-        
+
         .screenshot-img:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) rotate(2deg);
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
         }
-        
-        .user-info {
-            background: linear-gradient(135deg, var(--primary-color), #5a9bc8);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .tab-content {
-            background: white;
-            border-radius: 0 0 15px 15px;
+
+        /* Download Options */
+        .download-option {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
             padding: 20px;
-            min-height: 500px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
         }
-        
-        .filter-section {
-            background: #f8f9fa;
-            padding: 15px;
+
+        .download-option:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .video-thumbnail, .game-thumbnail {
+                height: 160px;
+            }
+
+            .btn-custom {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+            }
+
+            .user-info {
+                padding: 16px;
+            }
+
+            .screenshot-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .screenshot-img {
+                height: 80px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card {
+                border-radius: 16px;
+            }
+
+            .modal-content {
+                border-radius: 16px;
+            }
+
+            .nav-tabs .nav-link {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
             border-radius: 10px;
-            margin-bottom: 20px;
         }
-        
-        .video-item, .game-item {
-            cursor: pointer;
-            transition: all 0.3s;
-            border-radius: 10px;
-            padding: 10px;
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
         }
-        
-        .video-item:hover, .game-item:hover {
-            background: #f8f9fa;
+
+        /* Alert Styling */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            box-shadow: var(--shadow-sm);
         }
-        
-        .locked-content {
-            filter: blur(5px);
-            pointer-events: none;
-            user-select: none;
+
+        /* Category Badge */
+        .category-badge {
+            display: inline-block;
+            margin: 4px;
+            padding: 6px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
-        
-        .unlock-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-        }
-        
-        .locked-placeholder {
-            background: linear-gradient(45deg, #666, #999);
+
+        .category-badge:hover {
+            background: var(--primary-color);
             color: white;
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px;
-            margin: 10px 0;
+            transform: translateY(-2px);
         }
+
+        /* Premium Badge */
+        .premium-badge {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+            animation: shimmer 2s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Status Badge Animation */
+        .status-badge-animate {
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* Smooth Transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+/* FIX: Payment modal alert text tidak kelihatan di DARK MODE */
+[data-theme="dark"] .modal-content .alert {
+  border: 1px solid rgba(255,255,255,0.10) !important;
+}
+
+/* INFO (biru) */
+[data-theme="dark"] .modal-content .alert-info {
+  background: rgba(56, 189, 248, 0.18) !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .modal-content .alert-info * {
+  color: #f1f5f9 !important;
+}
+
+/* SUCCESS (hijau) */
+[data-theme="dark"] .modal-content .alert-success {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .modal-content .alert-success * {
+  color: #f1f5f9 !important;
+}
+
+/* DANGER (merah) jika saldo kurang */
+[data-theme="dark"] .modal-content .alert-danger {
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .modal-content .alert-danger * {
+  color: #f1f5f9 !important;
+}
+
+/* WARNING kalau ada */
+[data-theme="dark"] .modal-content .alert-warning {
+  background: rgba(245, 158, 11, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .modal-content .alert-warning * {
+  color: #f1f5f9 !important;
+}
+/* FIX: Select Version list item di DARK MODE */
+[data-theme="dark"] .modal-content .list-group-item,
+[data-theme="dark"] .modal-content .list-group-item-action {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .modal-content .list-group-item-action:hover,
+[data-theme="dark"] .modal-content .list-group-item-action:focus {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .modal-content .list-group-item.active {
+  background: rgba(99, 102, 241, 0.20) !important;
+  border-color: rgba(99, 102, 241, 0.45) !important;
+  color: var(--text-primary) !important;
+}
+
+
+/* Payment button loading state */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.btn-loading .btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.payment-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.45);
+  border-top-color: rgba(255,255,255,1);
+  border-radius: 50%;
+  animation: paySpin 0.8s linear infinite;
+}
+
+@keyframes paySpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Global Loading Overlay */
+.global-loading{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+}
+
+.global-loading.d-none{
+  display: none !important;
+}
+
+.global-loading-card{
+  min-width: 220px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+
+/* Game thumbnail + fallback */
+.game-thumb-wrap{
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+.game-thumb-wrap img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.game-thumb-fallback{
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.25rem;
+}
+
+/* Kalau image error */
+.game-thumb-wrap.is-fallback img{
+  display: none;
+}
+.game-thumb-wrap.is-fallback .game-thumb-fallback{
+  display: flex;
+}
+
     </style>
 </head>
-<body>
-    <!-- Login Modal (Tidak bisa ditutup tanpa login) -->
+<body data-theme="dark">
+    <!-- Floating Particles -->
+    <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 30%; animation-delay: 3s;"></div>
+    <div class="particle" style="left: 50%; animation-delay: 6s;"></div>
+    <div class="particle" style="left: 70%; animation-delay: 9s;"></div>
+    <div class="particle" style="left: 90%; animation-delay: 12s;"></div>
+
+    <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-lock"></i> Login Required</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-lock me-2"></i> Login Required</h5>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-4">
-                        <i class="fas fa-user-lock fa-3x text-primary"></i>
-                        <h4 class="mt-3">Welcome to Video & Game Portal</h4>
-                        <p class="text-muted">Please login with your Telegram ID and Key</p>
+                        <i class="fas fa-user-lock fa-4x mb-3" style="color: var(--primary-color);"></i>
+                        <h4>Welcome to Portal</h4>
+                        <p class="text-muted">Please login with your credentials</p>
                     </div>
                     
                     <form id="loginForm">
@@ -297,14 +908,14 @@
                         </div>
                         
                         <div class="mb-3">
-                            <button type="submit" class="btn btn-primary w-100 btn-custom">
-                                <i class="fas fa-sign-in-alt"></i> Login
+                            <button type="submit" class="btn btn-primary-custom btn-custom w-100">
+                                <i class="fas fa-sign-in-alt me-2"></i> Login
                             </button>
                         </div>
                         
                         <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Note:</strong> You need to register and get your key from the Telegram bot first.
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Register via Telegram bot first
                         </div>
                     </form>
                 </div>
@@ -312,11 +923,11 @@
         </div>
     </div>
 
-    <!-- Main Navigation (Hanya tampil setelah login) -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="mainNavbar" style="display: none;">
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" id="mainNavbar" style="display: none;">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-play-circle me-2"></i>Video & Game Portal
+                <i class="fas fa-play-circle me-2"></i>APKsgi
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -332,7 +943,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" id="navGames">
-                            <i class="fas fa-gamepad me-1"></i> Games APKSGI
+                            <i class="fas fa-gamepad me-1"></i> Games
                         </a>
                     </li>
                 </ul>
@@ -340,21 +951,25 @@
                 <div class="navbar-text text-light me-3" id="userInfoNav">
                     <i class="fas fa-user-circle me-1"></i>
                     <span id="userNameNav"></span>
-                    <span class="badge ms-2" id="userStatusNav"></span>
+                    <span class="badge ms-2 status-badge-animate" id="userStatusNav"></span>
+                </div>
+                
+                <div class="theme-toggle me-3" id="themeToggle">
+                    <div class="theme-toggle-slider"></div>
                 </div>
                 
                 <button class="btn btn-outline-light btn-sm" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content (Hanya tampil setelah login) -->
+    <!-- Main Content -->
     <div class="container mt-4" id="mainContent" style="display: none;">
         <!-- User Info -->
         <div class="user-info" id="userInfoSection">
-            <div class="row align-items-center">
+            <div class="row align-items-center position-relative">
                 <div class="col-md-6">
                     <h4><i class="fas fa-user me-2"></i> <span id="userName">Loading...</span></h4>
                     <p class="mb-0">
@@ -371,7 +986,7 @@
             </div>
         </div>
         
-        <!-- Tabs Content -->
+        <!-- Tabs -->
         <ul class="nav nav-tabs" id="mainTabs">
             <li class="nav-item">
                 <a class="nav-link active" id="videos-tab" data-bs-toggle="tab" href="#videos">
@@ -380,7 +995,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="games-tab" data-bs-toggle="tab" href="#games">
-                    <i class="fas fa-gamepad me-1"></i> Games APKSGI
+                    <i class="fas fa-gamepad me-1"></i> Games
                 </a>
             </li>
         </ul>
@@ -389,7 +1004,7 @@
             <!-- Videos Tab -->
             <div class="tab-pane fade show active" id="videos">
                 <div class="filter-section">
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-search"></i></span>
@@ -418,7 +1033,7 @@
             <!-- Games Tab -->
             <div class="tab-pane fade" id="games">
                 <div class="filter-section">
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-search"></i></span>
@@ -429,12 +1044,23 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-filter"></i></span>
                                 <select class="form-select" id="gamePlatformFilter">
-                                    <option value="">All Platforms (APK/PC)</option>
+                                    <option value="">All Platforms</option>
                                     <option value="APK">APK Games</option>
                                     <option value="PC">PC Games</option>
                                 </select>
                             </div>
                         </div>
+
+                <div class="col-md-6">
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                    <select class="form-select" id="gameCategoryFilter">
+                      <option value="">All Categories</option>
+                    </select>
+                  </div>
+                </div>
+
+
                     </div>
                 </div>
                 
@@ -452,15 +1078,11 @@
     <div class="modal fade" id="videoDetailModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-video"></i> Video Details</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-video me-2"></i> Video Details</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div id="videoDetailContent">
-                        <!-- Content loaded dynamically -->
-                    </div>
-                </div>
+                <div class="modal-body" id="videoDetailContent"></div>
             </div>
         </div>
     </div>
@@ -469,15 +1091,11 @@
     <div class="modal fade" id="gameDetailModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title"><i class="fas fa-gamepad"></i> Game Details</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-gamepad me-2"></i> Game Details</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div id="gameDetailContent">
-                        <!-- Content loaded dynamically -->
-                    </div>
-                </div>
+                <div class="modal-body" id="gameDetailContent"></div>
             </div>
         </div>
     </div>
@@ -486,19 +1104,19 @@
     <div class="modal fade" id="unlockVideoModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title"><i class="fas fa-lock-open"></i> Unlock Video</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-lock-open me-2"></i> Unlock Video</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-4">
-                        <i class="fas fa-unlock-alt fa-3x text-warning"></i>
-                        <h4 class="mt-3">Unlock Premium Video</h4>
+                        <i class="fas fa-unlock-alt fa-4x mb-3" style="color: var(--secondary-color);"></i>
+                        <h4>Unlock Premium Video</h4>
                     </div>
                     
                     <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>This video requires payment to unlock:</strong>
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Video requires payment:</strong>
                         <p class="mb-0 mt-2">Cost: <strong>Rp 2,000</strong></p>
                         <p>Your balance: Rp <span id="currentBalance">0</span></p>
                     </div>
@@ -506,8 +1124,8 @@
                     <div id="unlockMessage"></div>
                     
                     <div class="d-grid gap-2 mt-4">
-                        <button class="btn btn-warning btn-custom" id="confirmUnlockBtn">
-                            <i class="fas fa-coins"></i> Pay Rp 2,000 to Unlock
+                        <button class="btn btn-secondary-custom btn-custom" id="confirmUnlockBtn">
+                            <i class="fas fa-coins me-2"></i> Pay Rp 2,000 to Unlock
                         </button>
                         <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             Cancel
@@ -518,46 +1136,50 @@
         </div>
     </div>
 
+    <!-- Unlock Game Link Modal -->
+    <div class="modal fade" id="unlockGameModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-lock-open me-2"></i> Unlock Game Link</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-key fa-4x mb-3" style="color: var(--secondary-color);"></i>
+                        <h4>Unlock Download Link</h4>
+                        <p class="text-muted mb-0" id="unlockGameDomainText">-</p>
+                    </div>
 
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Link requires payment:</strong>
+                        <p class="mb-0 mt-2">Cost: <strong>Rp 2,000</strong></p>
+                        <p class="mb-0">Your balance: Rp <span id="currentBalanceGame">0</span></p>
+                    </div>
 
-<!-- Unlock Game Link Modal -->
-<div class="modal fade" id="unlockGameModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-warning text-dark">
-        <h5 class="modal-title"><i class="fas fa-lock-open"></i> Unlock Game Link</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+                    <div id="unlockGameMessage"></div>
 
-      <div class="modal-body">
-        <div class="text-center mb-4">
-          <i class="fas fa-key fa-3x text-warning"></i>
-          <h4 class="mt-3">Buka Link Download</h4>
-          <p class="text-muted mb-0" id="unlockGameDomainText">-</p>
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-secondary-custom btn-custom" id="confirmUnlockGameBtn">
+                            <i class="fas fa-coins me-2"></i> Pay Rp 2,000 to Unlock
+                        </button>
+                        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="alert alert-info">
-          <i class="fas fa-info-circle"></i>
-          <strong>Link ini butuh pembayaran untuk dibuka:</strong>
-          <p class="mb-0 mt-2">Cost: <strong>Rp 2,000</strong></p>
-          <p class="mb-0">Your balance: Rp <span id="currentBalanceGame">0</span></p>
-        </div>
-
-        <div id="unlockGameMessage"></div>
-
-        <div class="d-grid gap-2 mt-4">
-          <button class="btn btn-warning btn-custom" id="confirmUnlockGameBtn">
-            <i class="fas fa-coins"></i> Pay Rp 2,000 to Unlock
-          </button>
-          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-            Cancel
-          </button>
-        </div>
-      </div>
     </div>
+
+    <!-- Global Loading Overlay -->
+<div id="globalLoading" class="global-loading d-none" aria-hidden="true">
+  <div class="global-loading-card">
+    <div class="payment-spinner"></div>
+    <div id="globalLoadingText" class="mt-2">Loading...</div>
   </div>
 </div>
-
 
 
     <!-- Toast Container -->
@@ -596,6 +1218,70 @@
               // ===== UNLOCK STORAGE (PER USER) =====
               const UNLOCK_STORAGE_KEY = 'unlockState_v1';
 
+
+const themeToggle = document.getElementById('themeToggle');
+const themeTarget = document.body; // ini kuncinya
+const globalLoadingEl = document.getElementById('globalLoading');
+const globalLoadingTextEl = document.getElementById('globalLoadingText');
+
+function safeUrl(u){
+  return (u || '').toString().trim();
+}
+
+function handleGameThumbError(imgEl){
+  const wrap = imgEl?.closest?.('.game-thumb-wrap');
+  if (wrap) wrap.classList.add('is-fallback');
+}
+
+function buildGameThumbHtml(thumbnailUrl, altText){
+  const url = safeUrl(thumbnailUrl);
+
+  // kalau kosong, langsung fallback
+  if (!url) {
+    return `
+      <div class="game-thumb-wrap is-fallback">
+        <img alt="${altText || 'Game thumbnail'}">
+        <div class="game-thumb-fallback">If thumbnail are not available, try using a VPN</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="game-thumb-wrap">
+      <img
+        src="${url}"
+        alt="${altText || 'Game thumbnail'}"
+        loading="lazy"
+        onerror="handleGameThumbError(this)"
+      >
+      <div class="game-thumb-fallback">If thumbnails are not available, try using a VPN</div>
+    </div>
+  `;
+}
+
+
+
+function showGlobalLoading(text = 'Loading...') {
+  if (!globalLoadingEl) return;
+  if (globalLoadingTextEl) globalLoadingTextEl.textContent = text;
+  globalLoadingEl.classList.remove('d-none');
+}
+
+function hideGlobalLoading() {
+  if (!globalLoadingEl) return;
+  globalLoadingEl.classList.add('d-none');
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || themeTarget.getAttribute('data-theme') || 'dark';
+themeTarget.setAttribute('data-theme', savedTheme);
+
+themeToggle.addEventListener('click', () => {
+  const currentTheme = themeTarget.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  themeTarget.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+});
 
 
 function getUserUnlockKey() {
@@ -665,7 +1351,13 @@ function getUserUnlockKey() {
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             checkLoginStatus();
-            
+            document.getElementById('games-tab').addEventListener('click', () => {
+              if (games.length === 0) loadGames();
+            });
+
+            document.getElementById('videos-tab').addEventListener('click', () => {
+              if (videos.length === 0) loadVideos();
+            });
             // Event listeners
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -673,6 +1365,11 @@ function getUserUnlockKey() {
             document.getElementById('navGames').addEventListener('click', () => switchTab('games'));
             document.getElementById('confirmUnlockBtn').addEventListener('click', confirmUnlockVideo);
             document.getElementById('confirmUnlockGameBtn').addEventListener('click', confirmUnlockGameLink);
+            document.getElementById('gameSearch').addEventListener('input', filterGames);
+            document.getElementById('gamePlatformFilter').addEventListener('change', filterGames);
+            document.getElementById('gameCategoryFilter').addEventListener('change', filterGames);
+
+
 
             
             // Search filters
@@ -682,16 +1379,63 @@ function getUserUnlockKey() {
             document.getElementById('gamePlatformFilter').addEventListener('change', filterGames);
                         
             // Bootstrap tab change
-            const tabEl = document.querySelector('#mainTabs button[data-bs-toggle="tab"]');
-            tabEl.addEventListener('shown.bs.tab', function (event) {
-                const target = event.target.getAttribute('href');
-                if (target === '#games' && games.length === 0) {
-                    loadGames();
-                } else if (target === '#videos' && videos.length === 0) {
-                    loadVideos();
-                }
-            });
-        });
+// Bootstrap tab change (FIX)
+                document.querySelectorAll('#mainTabs a[data-bs-toggle="tab"]').forEach(tabEl => {
+                  tabEl.addEventListener('shown.bs.tab', function (event) {
+                    const target = event.target.getAttribute('href') || event.target.getAttribute('data-bs-target');
+
+                    if (target === '#games') {
+                      if (games.length === 0) loadGames();
+                    }
+
+                    if (target === '#videos') {
+                      if (videos.length === 0) loadVideos();
+                    }
+                  });
+                });
+
+// ✅ INI YANG KURANG: tutup DOMContentLoaded
+});
+
+function populateGameCategoryFilter() {
+  const categoryFilter = document.getElementById('gameCategoryFilter');
+  if (!categoryFilter) return;
+
+  // map: key normalisasi -> label tampil
+  const categoryMap = new Map();
+
+  games.forEach(g => {
+    if (!g.category) return;
+
+    g.category
+      .split(',')
+      .map(x => x.trim())
+      .filter(Boolean)
+      .forEach(raw => {
+        const key = raw.toLowerCase(); // untuk deteksi duplikat case-insensitive
+        if (!categoryMap.has(key)) {
+          // rapikan tampilan: trim + biarkan original pertama yang ketemu
+          categoryMap.set(key, raw);
+        }
+      });
+  });
+
+  // hapus option lama kecuali option pertama
+  while (categoryFilter.options.length > 1) {
+    categoryFilter.remove(1);
+  }
+
+  // sort berdasarkan label tampil (case-insensitive)
+  Array.from(categoryMap.values())
+    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    .forEach(label => {
+      const opt = document.createElement('option');
+      opt.value = label;       // value pakai label tampil
+      opt.textContent = label; // teks tampil
+      categoryFilter.appendChild(opt);
+    });
+}
+
 
         // Check login status
         function checkLoginStatus() {
@@ -738,12 +1482,58 @@ function getUserUnlockKey() {
             loadVideos();
         }
 
+
+
+function startPaymentLoading(buttonEl, loadingText = 'Processing...') {
+  if (!buttonEl) return;
+
+  // simpan label asli
+  if (!buttonEl.dataset.originalHtml) {
+    buttonEl.dataset.originalHtml = buttonEl.innerHTML;
+  }
+
+  buttonEl.classList.add('btn-loading');
+  buttonEl.disabled = true;
+
+  buttonEl.innerHTML = `
+    <span class="btn-text">
+      <span class="payment-spinner"></span>
+      ${loadingText}
+    </span>
+  `;
+}
+
+function stopPaymentLoading(buttonEl) {
+  if (!buttonEl) return;
+
+  const original = buttonEl.dataset.originalHtml;
+  if (original) buttonEl.innerHTML = original;
+
+  buttonEl.classList.remove('btn-loading');
+  buttonEl.disabled = false;
+}
+
+function setModalButtonsDisabled(modalId, disabled) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+
+  // disable semua button di footer/body modal biar aman
+  modal.querySelectorAll('button').forEach(btn => {
+    // biarin tombol close X tetap bisa kalau kamu mau
+    if (btn.classList.contains('btn-close')) return;
+    btn.disabled = disabled;
+  });
+}
+
+
         // Handle login
 async function handleLogin(e) {
   e.preventDefault();
 
   const telegramId = document.getElementById('telegramId').value.trim();
   const key = document.getElementById('key').value.trim();
+
+  const loginBtn = document.querySelector('#loginForm button[type="submit"]');
 
   if (!telegramId || !key) {
     showToast('error', 'Please enter both Telegram ID and Key');
@@ -755,7 +1545,10 @@ async function handleLogin(e) {
     return;
   }
 
-  showLoader(true);
+  // ✅ LOADING START
+  showGlobalLoading('Logging in...');
+  if (loginBtn) startPaymentLoading(loginBtn, 'Logging in...');
+  setModalButtonsDisabled('loginModal', true);
 
   try {
     const formData = new URLSearchParams();
@@ -766,7 +1559,7 @@ async function handleLogin(e) {
     const response = await fetch(USER_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData
+      body: formData.toString()
     });
 
     const result = await response.json();
@@ -784,19 +1577,27 @@ async function handleLogin(e) {
       localStorage.setItem('topupUser', JSON.stringify(currentUser));
 
       showMainContent();
-      loadUserData();
+      await loadUserData();
       showToast('success', 'Login successful!');
     } else {
       showToast('error', result.message || 'Login failed');
     }
   } catch (error) {
-    showToast('error', 'Network error. Please try again.');
     console.error('Login error:', error);
+    showToast('error', 'Network error. Please try again.');
   } finally {
-    showLoader(false);
+    // ✅ LOADING STOP
+    hideGlobalLoading();
+    if (loginBtn) stopPaymentLoading(loginBtn);
+    setModalButtonsDisabled('loginModal', false);
   }
-} // <-- INI WAJIB ADA
+}
 
+function getImageErrorHint() {
+  // Deteksi kasar dari console error umum
+  // Kita tidak bisa baca detail SSL dari event onerror, jadi kita pakai pesan umum.
+  return 'Gambar tidak bisa dimuat. Coba aktifkan VPN lalu refresh.';
+}
 
 
         // Handle logout
@@ -1005,8 +1806,9 @@ async function pay2000(description) {
                 html += `
                     <div class="col-md-4 col-lg-3 mb-4">
                         <div class="card video-item" onclick="showVideoDetail(${video.row})">
-                            <img src="${thumbnail}" class="video-thumbnail" alt="${video.nama_video}" 
-                                 onerror="this.src='https://via.placeholder.com/300x180?text=No+Thumbnail'">
+                            <img src="${thumbnail}" class="video-thumbnail" alt="${video.nama_video}"
+                            onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
+
                             <div class="card-body">
                                 <h6 class="card-title">${video.nama_video}</h6>
                                 <p class="card-text small text-muted">
@@ -1074,36 +1876,37 @@ async function pay2000(description) {
         }
 
         // Show video detail
-        async function showVideoDetail(rowNumber) {
-            showLoader(true);
-            
-            try {
-                const formData = new URLSearchParams();
-                formData.append('action', 'getVideoById');
-                formData.append('id', rowNumber);
-                
-                const response = await fetch(VIDEO_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    displayVideoDetail(result.data);
-                } else {
-                    showToast('error', 'Failed to load video details');
-                }
-            } catch (error) {
-                showToast('error', 'Network error loading video details');
-                console.error('Error loading video detail:', error);
-            } finally {
-                showLoader(false);
-            }
-        }
+async function showVideoDetail(rowNumber) {
+  showGlobalLoading('Loading video...');
+  showLoader(true);
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append('action', 'getVideoById');
+    formData.append('id', rowNumber);
+
+    const response = await fetch(VIDEO_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      displayVideoDetail(result.data);
+    } else {
+      showToast('error', 'Failed to load video details');
+    }
+  } catch (error) {
+    showToast('error', 'Network error loading video details');
+    console.error('Error loading video detail:', error);
+  } finally {
+    hideGlobalLoading();
+    showLoader(false);
+  }
+}
+
 
         // Display video detail
 function displayVideoDetail(video) {
@@ -1167,7 +1970,7 @@ function displayVideoDetail(video) {
     <div class="text-center mb-4">
       <img src="${thumbnail}" class="img-fluid rounded" alt="${video.nama_video}"
         style="max-height: 300px;"
-        onerror="this.src='https://via.placeholder.com/800x450?text=No+Thumbnail'">
+        onerror="this.onerror=null; this.src='https://via.placeholder.com/800x450?text=Use+VPN+to+load+thumbnail';">
     </div>
 
     <h4>🎬 ${video.nama_video}</h4>
@@ -1228,34 +2031,34 @@ function displayVideoDetail(video) {
 async function confirmUnlockVideo() {
   if (!currentVideoToUnlock) return;
 
+  const payBtn = document.getElementById('confirmUnlockBtn');
+
   const saldoBefore = parseInt(currentUser?.saldo || 0, 10);
   if (saldoBefore < 2000) {
     showToast('error', 'Insufficient balance');
     return;
   }
 
-  showLoader(true);
+  // START ANIMASI
+  startPaymentLoading(payBtn, 'Processing payment...');
+  setModalButtonsDisabled('unlockVideoModal', true);
 
   try {
     const result = await pay2000(`Unlock video ID: ${currentVideoToUnlock}`);
 
-    // Selalu refresh saldo dari server untuk memastikan potongan benar terjadi
     await loadUserData();
     const saldoAfter = parseInt(currentUser?.saldo || 0, 10);
 
     const paymentConfirmed = (saldoAfter <= (saldoBefore - 2000));
 
     if (result.status === 'success' || paymentConfirmed) {
-      // simpan unlock
       setVideoUnlocked(currentVideoToUnlock);
 
-      // tutup modal unlock
       const unlockModal = bootstrap.Modal.getInstance(document.getElementById('unlockVideoModal'));
       if (unlockModal) unlockModal.hide();
 
       showToast('success', 'Unlock berhasil. Saldo terpotong Rp 2.000.');
 
-      // refresh detail
       setTimeout(() => {
         showVideoDetail(currentVideoToUnlock);
       }, 300);
@@ -1266,9 +2069,12 @@ async function confirmUnlockVideo() {
     showToast('error', 'Network error');
     console.error('Error unlocking video:', error);
   } finally {
-    showLoader(false);
+    // STOP ANIMASI
+    setModalButtonsDisabled('unlockVideoModal', false);
+    stopPaymentLoading(payBtn);
   }
 }
+
 
 
 
@@ -1290,6 +2096,7 @@ async function confirmUnlockVideo() {
                 if (result.status === 'success') {
                     games = result.data || [];
                     displayGames(games);
+                    populateGameCategoryFilter();
                 } else {
                     showToast('error', 'Failed to load games');
                 }
@@ -1318,43 +2125,44 @@ async function confirmUnlockVideo() {
             let html = '<div class="row">';
             
             gameList.forEach(game => {
-                // Extract platform from name (APK or PC)
-                const platform = game.nama_game.includes('APK') ? 'APK' : 
+              const platform = game.nama_game.includes('APK') ? 'APK' :
                                game.nama_game.includes('PC') ? 'PC' : 'Unknown';
-                
-                // Get base game name (without version/platform)
-                let baseName = game.nama_game;
-                const versionMatch = game.nama_game.match(/\[(v\d+\.\d+(\.\d+)?)\]/);
-                const version = versionMatch ? versionMatch[1] : '';
-                
-                if (version) {
-                    baseName = baseName.replace(`[${version}]`, '').trim();
-                }
-                baseName = baseName.replace(' APK', '').replace(' PC', '').trim();
-                
-                // Check for multiple versions
-                const hasMultipleVersions = games.filter(g => 
-                    g.nama_game.includes(baseName) && g.nama_game !== game.nama_game
-                ).length > 0;
-                
-                html += `
-                    <div class="col-md-4 col-lg-3 mb-4">
-                        <div class="card game-item" onclick="showGameDetail('${game.id}', ${hasMultipleVersions})">
-                            <div class="card-header bg-success text-white">
-                                <i class="fas fa-gamepad me-1"></i> ${platform}
-                                ${hasMultipleVersions ? '<span class="badge bg-warning float-end">Multiple Versions</span>' : ''}
-                            </div>
-                            <div class="card-body">
-                                <h6 class="card-title">${baseName}</h6>
-                                ${version ? `<p class="small text-muted mb-1"><i class="fas fa-code-branch"></i> ${version}</p>` : ''}
-                                <p class="card-text small">
-                                    <i class="fas fa-weight-hanging"></i> ${game.ukuran_game || 'Unknown size'}<br>
-                                    <i class="fas fa-tags"></i> ${game.category || 'No category'}
-                                </p>
-                            </div>
-                        </div>
+
+              let baseName = game.nama_game;
+              const versionMatch = game.nama_game.match(/\[(v\d+\.\d+(\.\d+)?)\]/);
+              const version = versionMatch ? versionMatch[1] : '';
+
+              if (version) baseName = baseName.replace(`[${version}]`, '').trim();
+              baseName = baseName.replace(' APK', '').replace(' PC', '').trim();
+
+              const hasMultipleVersions = games.filter(g =>
+                g.nama_game.includes(baseName) && g.nama_game !== game.nama_game
+              ).length > 0;
+
+              // FIX: thumbnail variable
+              const thumb = buildGameThumbHtml(game.screenshot_game, baseName);
+
+              html += `
+                <div class="col-md-4 col-lg-3 mb-4">
+                  <div class="card game-item" onclick="showGameDetail('${game.id}', ${hasMultipleVersions})">
+                    <div class="card-header bg-success text-white">
+                      <i class="fas fa-gamepad me-1"></i> ${platform}
+                      ${hasMultipleVersions ? '<span class="badge bg-warning float-end">Multiple Versions</span>' : ''}
                     </div>
-                `;
+
+                    ${thumb}
+
+                    <div class="card-body">
+                      <h6 class="card-title">${baseName}</h6>
+                      ${version ? `<p class="small text-muted mb-1"><i class="fas fa-code-branch"></i> ${version}</p>` : ''}
+                      <p class="card-text small">
+                        <i class="fas fa-weight-hanging"></i> ${game.ukuran_game || 'Unknown size'}<br>
+                        <i class="fas fa-tags"></i> ${game.category || 'No category'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              `;
             });
             
             html += '</div>';
@@ -1362,78 +2170,95 @@ async function confirmUnlockVideo() {
         }
 
         // Filter games
-        function filterGames() {
-            const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
-            const platformFilter = document.getElementById('gamePlatformFilter').value;
-            
-            let filteredGames = games;
-            
-            // Search filter
-            if (searchTerm) {
-                filteredGames = filteredGames.filter(game => 
-                    game.nama_game.toLowerCase().includes(searchTerm) ||
-                    (game.category && game.category.toLowerCase().includes(searchTerm))
-                );
-            }
-            
-            // Platform filter
-            if (platformFilter) {
-                filteredGames = filteredGames.filter(game => {
-                    if (platformFilter === 'APK') return game.nama_game.includes('APK');
-                    if (platformFilter === 'PC') return game.nama_game.includes('PC');
-                    return true;
-                });
-            }
-            
-            displayGames(filteredGames);
-        }
+function filterGames() {
+  const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
+  const platformFilter = document.getElementById('gamePlatformFilter').value;
+  const categoryFilter = document.getElementById('gameCategoryFilter').value;
+
+  let filteredGames = games;
+
+  // Search filter
+  if (searchTerm) {
+    filteredGames = filteredGames.filter(game =>
+      (game.nama_game || '').toLowerCase().includes(searchTerm) ||
+      (game.category || '').toLowerCase().includes(searchTerm)
+    );
+  }
+
+  // Platform filter
+  if (platformFilter) {
+    filteredGames = filteredGames.filter(game => {
+      if (platformFilter === 'APK') return (game.nama_game || '').includes('APK');
+      if (platformFilter === 'PC') return (game.nama_game || '').includes('PC');
+      return true;
+    });
+  }
+
+  // Category filter
+if (categoryFilter) {
+  const selected = categoryFilter.toLowerCase();
+
+  filteredGames = filteredGames.filter(game => {
+    const cats = (game.category || '')
+      .split(',')
+      .map(x => x.trim().toLowerCase())
+      .filter(Boolean);
+
+    return cats.includes(selected);
+  });
+}
+
+  displayGames(filteredGames);
+}
+
 
         // Show game detail
-        async function showGameDetail(gameId, showVersionSelector = false) {
-            showLoader(true);
-            
-            try {
-                const formData = new URLSearchParams();
-                formData.append('action', 'getGameById');
-                formData.append('id', gameId);
-                
-                const response = await fetch(APKSGI_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    currentGameDetail = result.data;
-                    
-                    // Get all versions of this game
-                    if (showVersionSelector) {
-                        const baseName = currentGameDetail.nama_game.replace(/\[v\d+\.\d+(\.\d+)?\]/g, '').trim();
-                        const allVersions = games.filter(g => 
-                            g.nama_game.includes(baseName.replace(' APK', '').replace(' PC', ''))
-                        );
-                        
-                        if (allVersions.length > 1) {
-                            showVersionSelectorModal(allVersions);
-                            return;
-                        }
-                    }
-                    
-                    displayGameDetail(currentGameDetail);
-                } else {
-                    showToast('error', 'Failed to load game details');
-                }
-            } catch (error) {
-                showToast('error', 'Network error loading game details');
-                console.error('Error loading game detail:', error);
-            } finally {
-                showLoader(false);
-            }
+async function showGameDetail(gameId, showVersionSelector = false) {
+  showGlobalLoading('Loading game...');
+  showLoader(true);
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append('action', 'getGameById');
+    formData.append('id', gameId);
+
+    const response = await fetch(APKSGI_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      currentGameDetail = result.data;
+
+      if (showVersionSelector) {
+        const baseName = currentGameDetail.nama_game.replace(/\[v\d+\.\d+(\.\d+)?\]/g, '').trim();
+        const allVersions = games.filter(g =>
+          g.nama_game.includes(baseName.replace(' APK', '').replace(' PC', ''))
+        );
+
+        if (allVersions.length > 1) {
+          displayGameDetail(currentGameDetail); // optional biar modal tidak kosong
+          showVersionSelectorModal(allVersions);
+          return;
         }
+      }
+
+      displayGameDetail(currentGameDetail);
+    } else {
+      showToast('error', 'Failed to load game details');
+    }
+  } catch (error) {
+    showToast('error', 'Network error loading game details');
+    console.error('Error loading game detail:', error);
+  } finally {
+    hideGlobalLoading();
+    showLoader(false);
+  }
+}
+
 
         // Show version selector modal
         function showVersionSelectorModal(versions) {
@@ -1474,14 +2299,17 @@ async function confirmUnlockVideo() {
         }
 
         // Select game version
-        function selectGameVersion(gameId) {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('gameDetailModal'));
-            modal.hide();
-            
-            setTimeout(() => {
-                showGameDetail(gameId, false);
-            }, 300);
-        }
+function selectGameVersion(gameId) {
+  showGlobalLoading('Loading selected version...');
+
+  const modal = bootstrap.Modal.getInstance(document.getElementById('gameDetailModal'));
+  if (modal) modal.hide();
+
+  setTimeout(() => {
+    showGameDetail(gameId, false);
+  }, 150);
+}
+
 
         // Display game detail
 function displayGameDetail(game) {
@@ -1766,24 +2594,36 @@ function promptUnlockGameLink(domain, originalLink, adLink, token) {
 async function confirmUnlockGameLink() {
   if (!pendingGameUnlock) return;
 
+  const payBtn = document.getElementById('confirmUnlockGameBtn');
+
   const saldoBefore = parseInt(currentUser?.saldo || 0, 10);
   if (saldoBefore < 2000) {
     showToast('error', 'Insufficient balance');
     return;
   }
 
-  const { domain, originalLink, adLink, token } = pendingGameUnlock;
+  // START ANIMASI
+  startPaymentLoading(payBtn, 'Processing payment...');
+  setModalButtonsDisabled('unlockGameModal', true);
 
-  // tutup modal game dulu biar sama feel video
-  const gameUnlockModal = bootstrap.Modal.getInstance(document.getElementById('unlockGameModal'));
-  if (gameUnlockModal) gameUnlockModal.hide();
+  try {
+    const { domain, originalLink, adLink, token } = pendingGameUnlock;
 
-  // jalanin fungsi unlock yang sudah ada (tetap pakai API, potong saldo, refresh, set unlock)
-  await unlockGameLink(domain, originalLink, adLink, token);
+    // boleh tetap tampil modal, atau kamu bisa hide modal dulu
+    // kalau kamu mau tetap hide, biarkan ini:
+    const gameUnlockModal = bootstrap.Modal.getInstance(document.getElementById('unlockGameModal'));
+    if (gameUnlockModal) gameUnlockModal.hide();
 
-  // bersihkan pending
-  pendingGameUnlock = null;
+    await unlockGameLink(domain, originalLink, adLink, token);
+
+    pendingGameUnlock = null;
+  } finally {
+    // STOP ANIMASI
+    setModalButtonsDisabled('unlockGameModal', false);
+    stopPaymentLoading(payBtn);
+  }
 }
+
 
 
         // Unlock game link
