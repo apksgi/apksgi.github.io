@@ -1019,7 +1019,11 @@ select.form-select option {
                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
                                 <input type="password" class="form-control" id="key" placeholder="Enter your 5-digit key" required>
                             </div>
-                            <small class="text-muted">Get your key from the Telegram bot</small>
+                            <small class="text-muted">
+                              Get your key from the Telegram bot:
+                              <a href="https://t.me/indapkbot" target="_blank" rel="noopener">@indapkbot</a>
+                            </small>
+
                         </div>
                         
                         <div class="mb-3">
@@ -1027,11 +1031,21 @@ select.form-select option {
                                 <i class="fas fa-sign-in-alt me-2"></i> Login
                             </button>
                         </div>
+                        <div class="mb-3">
+                          <a class="btn btn-secondary-custom btn-custom w-100"
+                             href="https://t.me/indapkbot"
+                             target="_blank"
+                             rel="noopener">
+                            <i class="fab fa-telegram me-2"></i> Register (Telegram Bot)
+                          </a>
+                        </div>
+
                         
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
                             <strong>Note:</strong> Register via Telegram bot first
                         </div>
+                        
                     </form>
                 </div>
             </div>
@@ -1245,7 +1259,7 @@ select.form-select option {
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
                         <strong>Video requires payment:</strong>
-                        <p class="mb-0 mt-2">Cost: <strong>Rp 2,000</strong></p>
+                        <p class="mb-0 mt-2">Cost: <strong>Rp 5,000</strong></p>
                         <p>Your balance: Rp <span id="currentBalance">0</span></p>
                     </div>
                     
@@ -1373,7 +1387,7 @@ select.form-select option {
         <div class="alert alert-info">
           <i class="fas fa-info-circle me-2"></i>
           <strong>Biaya unlock fitur:</strong>
-          <p class="mb-0 mt-2">Cost: <strong>Rp 2,000</strong></p>
+          <p class="mb-0 mt-2">Cost: <strong>Rp 5,000</strong></p>
           <p class="mb-0">Your balance: Rp <span id="currentBalanceStreaming">0</span></p>
         </div>
 
@@ -1440,7 +1454,8 @@ const themeTarget = document.body; // ini kuncinya
 const globalLoadingEl = document.getElementById('globalLoading');
 const globalLoadingTextEl = document.getElementById('globalLoadingText');
 const PREMIUM_TOPUP_URL = "https://www.indapk.com/topup.html";
-const STREAMING_UNLOCK_PRICE = 2500;
+const STREAMING_UNLOCK_PRICE = 5000;
+
 
 
 
@@ -2351,7 +2366,7 @@ function displayVideoDetail(video) {
   const originalLink =
     video.link_original || video.link_video || video.original_link || video.original || '';
 
-  const isPremium = currentUser?.status === 'Premium';
+  const isPremium = String(currentUser?.status || '').toLowerCase() === 'premium';
   const alreadyUnlocked = isPremium || isVideoUnlocked(video.row);
   const canPayNow = (parseInt(currentUser?.saldo || 0, 10) >= 2000);
 
@@ -2750,7 +2765,7 @@ function displayGameDetail(game) {
   gameUnlockLookup = {}; // reset tiap render modal game
   const modalContent = document.getElementById('gameDetailContent');
   const platform = (game.nama_game || '').includes('APK') ? 'APK' : 'PC';
-  const isPremium = currentUser?.status === 'Premium';
+  
 
   // Parse categories
   const categories = game.category ? game.category.split(',').map(c => c.trim()).filter(Boolean) : [];
@@ -3450,16 +3465,20 @@ async function confirmUnlockStreaming() {
 
 
 function openStreamingPlayer(encodedJson) {
-  if (!isStreamingUnlocked()) {
-    showToast('warning', 'Fitur streaming masih terkunci');
-    return;
-  }
-
   let item = null;
   try {
     item = JSON.parse(decodeURIComponent(encodedJson));
   } catch {
     showToast('error', 'Data streaming invalid');
+    return;
+  }
+
+  const streamId = String(item?.id ?? '');
+  const isPremium = String(currentUser?.status || '').toLowerCase() === 'premium';
+
+  // ✅ FIX: cek unlock PER VIDEO (bukan unlock fitur streaming)
+  if (!isPremium && !isStreamingVideoUnlocked(streamId)) {
+    showToast('warning', `Video masih terkunci. Silakan bayar Rp ${formatNumber(STREAMING_UNLOCK_PRICE)} untuk unlock.`);
     return;
   }
 
@@ -3475,7 +3494,6 @@ function openStreamingPlayer(encodedJson) {
   const content = document.getElementById('streamingPlayerContent');
   const isHls = url.toLowerCase().includes('.m3u8');
 
-  // Mirip contoh: pakai <video> + <source> untuk MP4
   content.innerHTML = `
     <h5 class="mb-3"><i class="fas fa-tv me-2"></i>${title}</h5>
     <div class="ratio ratio-16x9">
@@ -3492,7 +3510,6 @@ function openStreamingPlayer(encodedJson) {
     </div>
   `;
 
-  // Kalau HLS, baru set via hls.js
   if (isHls) {
     const videoEl = document.getElementById('streamVideoEl');
 
@@ -3508,7 +3525,7 @@ function openStreamingPlayer(encodedJson) {
       };
       modalEl.addEventListener('hidden.bs.modal', cleanup);
     } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-      videoEl.src = url; // Safari native HLS
+      videoEl.src = url;
     } else {
       showToast('error', 'Browser tidak mendukung HLS streaming');
       return;
