@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -865,6 +864,122 @@ select.form-select option {
   display: flex;
 }
 
+/* =========================================================
+   PREMIUM EXPIRY UI (IMPROVED)
+   ========================================================= */
+.premium-expiry-card{
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+}
+
+.premium-expiry-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.premium-expiry-label{
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+.premium-expiry-date{
+  margin-top: 8px;
+  font-weight: 700;
+}
+
+.premium-expiry-sub{
+  margin-top: 4px;
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
+.premium-expiry-pill{
+  font-weight: 900;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* pill variants */
+.premium-expiry-pill.ok{
+  background: rgba(16,185,129,0.25);
+  color: #ecfdf5;
+  border-color: rgba(16,185,129,0.45);
+}
+.premium-expiry-pill.warn{
+  background: rgba(245,158,11,0.25);
+  color: #fffbeb;
+  border-color: rgba(245,158,11,0.55);
+}
+.premium-expiry-pill.danger{
+  background: rgba(239,68,68,0.25);
+  color: #fef2f2;
+  border-color: rgba(239,68,68,0.55);
+}
+.premium-expiry-pill.expired{
+  background: rgba(2,6,23,0.35);
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,0.2);
+}
+.premium-expiry-pill.regular{
+  background: rgba(148,163,184,0.25);
+  color: #f8fafc;
+  border-color: rgba(148,163,184,0.45);
+}
+
+/* urgency meter */
+.premium-expiry-meter{
+  margin-top: 10px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.16);
+  overflow: hidden;
+}
+
+.premium-expiry-meter-bar{
+  height: 100%;
+  border-radius: 999px;
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+.premium-expiry-meter-bar.ok{ background: rgba(16,185,129,0.95); }
+.premium-expiry-meter-bar.warn{ background: rgba(245,158,11,0.95); }
+.premium-expiry-meter-bar.danger{ background: rgba(239,68,68,0.95); }
+.premium-expiry-meter-bar.expired{ background: rgba(148,163,184,0.55); }
+
+.premium-expiry-actions{
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.premium-expiry-actions .btn{
+  border-radius: 12px !important;
+  padding: 8px 14px !important;
+  font-weight: 800;
+}
+
+.premium-expiry-actions .btn-outline-light{
+  border-color: rgba(255,255,255,0.6) !important;
+}
+
+.premium-expiry-actions .btn-outline-light:hover{
+  background: rgba(255,255,255,0.95) !important;
+  color: #0f172a !important;
+}
+
     </style>
 </head>
 <body data-theme="dark">
@@ -938,8 +1053,13 @@ select.form-select option {
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="#" id="navVideos">
-                            <i class="fas fa-video me-1"></i> Videos
+                            <i class="fas fa-video me-1"></i> Videos Download
                         </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#" id="navStreaming">
+                        <i class="fas fa-tv me-1"></i> Streaming
+                      </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" id="navGames">
@@ -987,18 +1107,26 @@ select.form-select option {
         </div>
         
         <!-- Tabs -->
-        <ul class="nav nav-tabs" id="mainTabs">
-            <li class="nav-item">
+            <ul class="nav nav-tabs" id="mainTabs">
+              <li class="nav-item">
                 <a class="nav-link active" id="videos-tab" data-bs-toggle="tab" href="#videos">
-                    <i class="fas fa-video me-1"></i> Videos
+                  <i class="fas fa-video me-1"></i> Videos Download
                 </a>
-            </li>
-            <li class="nav-item">
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" id="streaming-tab" data-bs-toggle="tab" href="#streaming">
+                  <i class="fas fa-tv me-1"></i> Streaming
+                </a>
+              </li>
+
+              <li class="nav-item">
                 <a class="nav-link" id="games-tab" data-bs-toggle="tab" href="#games">
-                    <i class="fas fa-gamepad me-1"></i> Games
+                  <i class="fas fa-gamepad me-1"></i> Games
                 </a>
-            </li>
-        </ul>
+              </li>
+            </ul>
+
         
         <div class="tab-content" id="mainTabsContent">
             <!-- Videos Tab -->
@@ -1195,8 +1323,92 @@ select.form-select option {
         </div>
     </div>
 
+
+<!-- Streaming Tab -->
+<div class="tab-pane fade" id="streaming">
+  <div class="filter-section">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" class="form-control" id="streamingSearch" placeholder="Search streaming...">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-filter"></i></span>
+          <select class="form-select" id="streamingCategoryFilter">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="streamingList">
+    <div class="text-center py-5">
+      <div class="loader"></div>
+      <p>Loading streaming...</p>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Unlock Streaming Feature Modal -->
+<div class="modal fade" id="unlockStreamingModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-lock-open me-2"></i> Unlock Streaming</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-4">
+          <i class="fas fa-tv fa-4x mb-3" style="color: var(--secondary-color);"></i>
+          <h4>Unlock Fitur Streaming</h4>
+          <p class="text-muted mb-0">Bayar sekali untuk membuka akses streaming.</p>
+        </div>
+
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Biaya unlock fitur:</strong>
+          <p class="mb-0 mt-2">Cost: <strong>Rp 2,000</strong></p>
+          <p class="mb-0">Your balance: Rp <span id="currentBalanceStreaming">0</span></p>
+        </div>
+
+        <div id="unlockStreamingMessage"></div>
+
+        <div class="d-grid gap-2 mt-4">
+          <button class="btn btn-secondary-custom btn-custom" id="confirmUnlockStreamingBtn">
+            <i class="fas fa-coins me-2"></i> Pay Rp 2,000 to Unlock Streaming
+          </button>
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Streaming Player Modal -->
+<div class="modal fade" id="streamingPlayerModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-tv me-2"></i> Streaming Player</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="streamingPlayerContent"></div>
+    </div>
+  </div>
+</div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
     <script>
         // API URLs
         const USER_API_URL = "https://script.google.com/macros/s/AKfycbweRCcVmuWrz2gpvIanBqeIsyubAUgOjSssHhnXBW3WUiOu9QbNeUq-y4-9Ps6BuQ8L/exec";
@@ -1213,6 +1425,10 @@ select.form-select option {
         let currentVideoDetail = null;
         let pendingGameUnlock = null;
         let gameUnlockLookup = {}; 
+        let streamings = [];
+        let currentStreamingToUnlock = null;
+        let currentStreamingItem = null;
+
 
 
               // ===== UNLOCK STORAGE (PER USER) =====
@@ -1223,10 +1439,205 @@ const themeToggle = document.getElementById('themeToggle');
 const themeTarget = document.body; // ini kuncinya
 const globalLoadingEl = document.getElementById('globalLoading');
 const globalLoadingTextEl = document.getElementById('globalLoadingText');
+const PREMIUM_TOPUP_URL = "https://www.indapk.com/topup.html";
+const STREAMING_UNLOCK_PRICE = 2500;
+
+
+
+function parseExpiryDate(expiryStr) {
+  if (!expiryStr) return null;
+  const s = String(expiryStr).trim();
+  if (!s || s === "-") return null;
+
+  // YYYY-MM-DD (paling umum dari server)
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const y = parseInt(m[1], 10);
+    const mo = parseInt(m[2], 10) - 1;
+    const d = parseInt(m[3], 10);
+    return new Date(Date.UTC(y, mo, d));
+  }
+
+  // dd/MM/yyyy (legacy)
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const d = parseInt(m[1], 10);
+    const mo = parseInt(m[2], 10) - 1;
+    const y = parseInt(m[3], 10);
+    return new Date(Date.UTC(y, mo, d));
+  }
+
+  // ISO / other parseable formats
+  const dt = new Date(s);
+  if (!isNaN(dt.getTime())) return dt;
+
+  return null;
+}
+
+
+function daysUntilUTC(expiryDate) {
+  if (!expiryDate) return null;
+
+  const now = new Date();
+  const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const expUTC = Date.UTC(expiryDate.getUTCFullYear(), expiryDate.getUTCMonth(), expiryDate.getUTCDate());
+
+  return Math.round((expUTC - todayUTC) / 86400000); // selisih hari murni
+}
+
+function copyPremiumExpiry() {
+  const exp = (currentUser?.premium_expiry || "").toString().trim();
+  if (!exp) {
+    showToast('error', 'Tanggal Premium tidak tersedia');
+    return;
+  }
+  copyTextToClipboard(exp); // kamu sudah punya fungsi ini
+}
+
+function buildPremiumExpiryHtml(user) {
+  const status = String(user?.status || "Reguler").trim();
+  const isPremium = status.toLowerCase() === "premium";
+
+  // Kalau REGULER: tampilkan CTA (kalau tidak mau, ganti return jadi '')
+  if (!isPremium) {
+    return `
+      <div class="premium-expiry-card">
+        <div class="premium-expiry-row">
+          <div class="premium-expiry-label"><i class="fas fa-user me-1"></i> Reguler</div>
+          <span class="premium-expiry-pill regular">FREE</span>
+        </div>
+        <div class="premium-expiry-sub">
+          Upgrade ke Premium untuk unlock otomatis & akses penuh.
+        </div>
+        <div class="premium-expiry-actions">
+          <a class="btn btn-sm btn-secondary-custom btn-custom"
+             href="${PREMIUM_TOPUP_URL}" target="_blank" rel="noopener">
+            <i class="fas fa-crown me-1"></i> Upgrade Premium
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  // PREMIUM tapi expiry kosong/invalid
+  const expStr = (user?.premium_expiry || "").toString().trim();
+  const expDate = parseExpiryDate(expStr);
+
+  if (!expDate) {
+    return `
+      <div class="premium-expiry-card">
+        <div class="premium-expiry-row">
+          <div class="premium-expiry-label"><i class="fas fa-crown me-1"></i> Premium</div>
+          <span class="premium-expiry-pill warn">AKTIF</span>
+        </div>
+        <div class="premium-expiry-sub">
+          Tanggal berakhir belum terdeteksi. Silakan refresh / login ulang.
+        </div>
+        <div class="premium-expiry-actions">
+          <a class="btn btn-sm btn-secondary-custom btn-custom"
+             href="${PREMIUM_TOPUP_URL}" target="_blank" rel="noopener">
+            <i class="fas fa-sync-alt me-1"></i> Perpanjang Premium
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  const daysLeft = daysUntilUTC(expDate);
+  const dateLabel = formatDateIdLong(expDate);
+
+  // Tentukan warna & pesan
+  let variant = "ok";
+  let pillText = "AKTIF";
+  let subText = `Sisa ${daysLeft} hari.`;
+
+  if (daysLeft < 0) {
+    variant = "expired";
+    pillText = "EXPIRED";
+    subText = `Sudah berakhir ${Math.abs(daysLeft)} hari lalu.`;
+  } else if (daysLeft === 0) {
+    variant = "danger";
+    pillText = "HARI INI";
+    subText = "Berakhir hari ini. Perpanjang sekarang agar tidak putus.";
+  } else if (daysLeft <= 1) {
+    variant = "danger";
+    pillText = `${daysLeft} HARI`;
+    subText = `Sisa ${daysLeft} hari. Hampir habis—perpanjang sekarang.`;
+  } else if (daysLeft <= 3) {
+    variant = "warn";
+    pillText = `${daysLeft} HARI`;
+    subText = `Sisa ${daysLeft} hari. Sebentar lagi habis—siapkan perpanjangan.`;
+  } else if (daysLeft <= 7) {
+    variant = "warn";
+    pillText = `${daysLeft} HARI`;
+    subText = `Sisa ${daysLeft} hari.`;
+  } else {
+    variant = "ok";
+    pillText = "AKTIF";
+    subText = `Sisa ${daysLeft} hari.`;
+  }
+
+  // Meter: full kalau >7 hari, turun kalau <=7 hari
+  const windowDays = 7;
+  const meterPct = Math.max(0, Math.min(100, (Math.min(daysLeft, windowDays) / windowDays) * 100));
+
+  return `
+    <div class="premium-expiry-card">
+      <div class="premium-expiry-row">
+        <div class="premium-expiry-label"><i class="fas fa-crown me-1"></i> Premium</div>
+        <span class="premium-expiry-pill ${variant}">${pillText}</span>
+      </div>
+
+      <div class="premium-expiry-date">
+        <i class="fas fa-calendar-alt me-1"></i>
+        Masa aktif sampai: <strong>${dateLabel}</strong>
+      </div>
+
+      <div class="premium-expiry-sub">
+        <i class="fas fa-hourglass-half me-1"></i> ${subText}
+      </div>
+
+      <div class="premium-expiry-meter" aria-hidden="true">
+        <div class="premium-expiry-meter-bar ${variant}" style="width:${meterPct}%;"></div>
+      </div>
+
+      <div class="premium-expiry-actions">
+        <a class="btn btn-sm btn-secondary-custom btn-custom"
+           href="${PREMIUM_TOPUP_URL}" target="_blank" rel="noopener">
+          <i class="fas fa-sync-alt me-1"></i> Perpanjang
+        </a>
+
+        <button class="btn btn-sm btn-outline-light" onclick="copyPremiumExpiry()">
+          <i class="fas fa-copy me-1"></i> Copy Tanggal
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+
+
+function formatDateIdLong(dateObj) {
+  if (!dateObj) return "-";
+  const monthNames = [
+    "Januari","Februari","Maret","April","Mei","Juni",
+    "Juli","Agustus","September","Oktober","November","Desember"
+  ];
+
+  // Pakai UTC supaya aman tidak geser tanggal
+  const d = dateObj.getUTCDate();
+  const m = dateObj.getUTCMonth();
+  const y = dateObj.getUTCFullYear();
+
+  return `${d} ${monthNames[m]} ${y}`;
+}
+
+
 
 function safeUrl(u){
-  return (u || '').toString().trim();
+  return normalizeImgUrl(u);
 }
+
 
 function handleGameThumbError(imgEl){
   const wrap = imgEl?.closest?.('.game-thumb-wrap');
@@ -1290,19 +1701,89 @@ function getUserUnlockKey() {
 }
 
 
-  function loadUnlockState() {
-    try {
-      const raw = localStorage.getItem(UNLOCK_STORAGE_KEY);
-      const obj = raw ? JSON.parse(raw) : {};
-      const userKey = getUserUnlockKey();
-      if (!obj[userKey]) obj[userKey] = { videos: {}, gameLinks: {} };
-      if (!obj[userKey].videos) obj[userKey].videos = {};
-      if (!obj[userKey].gameLinks) obj[userKey].gameLinks = {};
-      return obj;
-    } catch {
-      return { [getUserUnlockKey()]: { videos: {}, gameLinks: {} } };
-    }
+function loadUnlockState() {
+  try {
+    const raw = localStorage.getItem(UNLOCK_STORAGE_KEY);
+    const obj = raw ? JSON.parse(raw) : {};
+    const userKey = getUserUnlockKey();
+
+    if (!obj[userKey]) obj[userKey] = { videos: {}, gameLinks: {}, features: {}, streamingVideos: {} };
+    if (!obj[userKey].videos) obj[userKey].videos = {};
+    if (!obj[userKey].gameLinks) obj[userKey].gameLinks = {};
+    if (!obj[userKey].features) obj[userKey].features = {};
+    if (!obj[userKey].streamingVideos) obj[userKey].streamingVideos = {}; // ✅ INI
+
+    return obj;
+  } catch {
+    return { [getUserUnlockKey()]: { videos: {}, gameLinks: {}, features: {}, streamingVideos: {} } };
   }
+}
+
+
+function isStreamingVideoUnlocked(streamId) {
+  const isPremium = String(currentUser?.status || '').toLowerCase() === 'premium';
+  if (isPremium) return true;
+
+  const st = loadUnlockState();
+  const userKey = getUserUnlockKey();
+  return !!st[userKey]?.streamingVideos?.[String(streamId)];
+}
+
+function setStreamingVideoUnlocked(streamId) {
+  const st = loadUnlockState();
+  const userKey = getUserUnlockKey();
+  st[userKey].streamingVideos[String(streamId)] = true;
+  saveUnlockState(st);
+}
+
+
+async function payAmount(amount, description) {
+  const telegramId = getTelegramIdForApi();
+  const userKey = getUserKeyForApi();
+
+  if (!telegramId) return { status: 'error', message: 'Telegram ID kosong. Silakan login ulang.' };
+  if (!userKey || userKey.length !== 5) return { status: 'error', message: 'Key tidak valid. Silakan login ulang.' };
+
+  const body = new URLSearchParams();
+  body.append('action', 'deductBalance');
+  body.append('wa_number', telegramId);
+  body.append('telegram_id', telegramId);
+  body.append('key', userKey);
+  body.append('user_key', userKey);
+  body.append('amount', String(amount));
+  body.append('description', description);
+
+  const res = await fetch(USER_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+    body: body.toString()
+  });
+
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch { return { status: 'unknown', message: 'Response API tidak valid JSON', raw: text }; }
+}
+
+
+
+function isFeatureUnlocked(featureName) {
+  const st = loadUnlockState();
+  const userKey = getUserUnlockKey();
+  return !!st[userKey]?.features?.[String(featureName)];
+}
+
+function setFeatureUnlocked(featureName) {
+  const st = loadUnlockState();
+  const userKey = getUserUnlockKey();
+  st[userKey].features[String(featureName)] = true;
+  saveUnlockState(st);
+}
+
+function isStreamingUnlocked() {
+  const isPremium = String(currentUser?.status || '').toLowerCase() === 'premium';
+  return isPremium || isFeatureUnlocked('streaming');
+}
+
 
   function saveUnlockState(state) {
     localStorage.setItem(UNLOCK_STORAGE_KEY, JSON.stringify(state));
@@ -1368,6 +1849,11 @@ function getUserUnlockKey() {
             document.getElementById('gameSearch').addEventListener('input', filterGames);
             document.getElementById('gamePlatformFilter').addEventListener('change', filterGames);
             document.getElementById('gameCategoryFilter').addEventListener('change', filterGames);
+            document.getElementById('navStreaming').addEventListener('click', () => switchTab('streaming'));
+            document.getElementById('streamingSearch').addEventListener('input', filterStreaming);
+            document.getElementById('streamingCategoryFilter').addEventListener('change', filterStreaming);
+            document.getElementById('confirmUnlockStreamingBtn').addEventListener('click', confirmUnlockStreaming);
+
 
 
 
@@ -1383,6 +1869,9 @@ function getUserUnlockKey() {
                 document.querySelectorAll('#mainTabs a[data-bs-toggle="tab"]').forEach(tabEl => {
                   tabEl.addEventListener('shown.bs.tab', function (event) {
                     const target = event.target.getAttribute('href') || event.target.getAttribute('data-bs-target');
+                    if (target === '#streaming') {
+                      if (streamings.length === 0) loadStreaming();
+                    }
 
                     if (target === '#games') {
                       if (games.length === 0) loadGames();
@@ -1664,123 +2153,68 @@ function getUserKeyForApi() {
 
 // helper pembayaran universal (untuk video & game per-link)
 async function pay2000(description) {
-  const telegramId = getTelegramIdForApi();
-  const userKey = getUserKeyForApi();
-
-  if (!telegramId) {
-    return { status: 'error', message: 'Telegram ID kosong. Silakan login ulang.' };
-  }
-  if (!userKey || userKey.length !== 5) {
-    return { status: 'error', message: 'Key tidak valid. Silakan login ulang.' };
-  }
-
-  const body = new URLSearchParams();
-  body.append('action', 'deductBalance');
-
-  body.append('wa_number', telegramId);
-  body.append('telegram_id', telegramId);
-
-  body.append('key', userKey);
-  body.append('user_key', userKey);
-
-  body.append('amount', '2000');
-  body.append('description', description);
-
-  const res = await fetch(USER_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept': 'application/json'
-    },
-    body: body.toString()
-  });
-
-  // Ambil text dulu biar aman
-  const text = await res.text();
-
-  // Coba parse JSON
-  try {
-    const json = JSON.parse(text);
-    return json;
-  } catch {
-    // Response bukan JSON atau kosong
-    return { status: 'unknown', message: 'Response API tidak valid JSON', raw: text };
-  }
+  return payAmount(2000, description);
 }
 
 
 
-        // Update user UI
-        function updateUserUI() {
-            if (!currentUser) return;
-            
-            document.getElementById('userName').textContent = currentUser.nama_user || 'User';
-            document.getElementById('userNameNav').textContent = currentUser.nama_user || 'User';
-            document.getElementById('userId').textContent = currentUser.user_id || '-';
-            document.getElementById('userBalance').textContent = formatNumber(currentUser.saldo || 0);
-            document.getElementById('userStatus').textContent = currentUser.status || 'Reguler';
-            
-            // Update status badge color
-            const statusBadge = document.getElementById('userStatusBadge');
-            statusBadge.className = 'badge fs-6 p-2';
-            
-            if (currentUser.status === 'Premium') {
-                statusBadge.classList.add('bg-warning', 'text-dark');
-                statusBadge.innerHTML = `<i class="fas fa-crown me-1"></i> Status: <span id="userStatus">Premium</span>`;
-            } else {
-                statusBadge.classList.add('bg-secondary', 'text-white');
-                statusBadge.innerHTML = `<i class="fas fa-user me-1"></i> Status: <span id="userStatus">Reguler</span>`;
-            }
-            
-            // Update navbar status badge
-            const navStatusBadge = document.getElementById('userStatusNav');
-            navStatusBadge.className = 'badge ms-2';
-            if (currentUser.status === 'Premium') {
-                navStatusBadge.classList.add('bg-warning', 'text-dark');
-                navStatusBadge.textContent = 'Premium';
-            } else {
-                navStatusBadge.classList.add('bg-secondary');
-                navStatusBadge.textContent = 'Reguler';
-            }
-            
-            // Show premium expiry if available
-            const premiumExpiryEl = document.getElementById('premiumExpiry');
-            if (currentUser.premium_expiry && currentUser.status === 'Premium') {
-                premiumExpiryEl.innerHTML = `<i class="fas fa-calendar-alt me-1"></i> Premium expires: ${currentUser.premium_expiry}`;
-            } else {
-                premiumExpiryEl.innerHTML = '';
-            }
-        }
 
-        // Load videos
-        async function loadVideos() {
-            showLoader(true, 'videosList');
-            
-            try {
-                const response = await fetch(VIDEO_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'action=getVideos'
-                });
-                
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    videos = result.data || [];
-                    displayVideos(videos);
-                    populateCategoryFilter();
-                } else {
-                    showToast('error', 'Failed to load videos');
-                }
-            } catch (error) {
-                showToast('error', 'Network error loading videos');
-                console.error('Error loading videos:', error);
-            } finally {
-                showLoader(false, 'videosList');
-            }
-        }
+        // Update user UI
+function updateUserUI() {
+  if (!currentUser) return;
+
+  document.getElementById('userName').textContent = currentUser.nama_user || 'User';
+  document.getElementById('userNameNav').textContent = currentUser.nama_user || 'User';
+  document.getElementById('userId').textContent = currentUser.user_id || '-';
+  document.getElementById('userBalance').textContent = formatNumber(currentUser.saldo || 0);
+
+  // Status text (akan di-render ulang di badge)
+  document.getElementById('userStatus').textContent = currentUser.status || 'Reguler';
+
+  // Badge di user-info
+  const statusBadge = document.getElementById('userStatusBadge');
+  statusBadge.className = 'badge fs-6 p-2';
+
+  if (String(currentUser.status || '').toLowerCase() === 'premium') {
+    statusBadge.classList.add('bg-warning', 'text-dark');
+    statusBadge.innerHTML = `<i class="fas fa-crown me-1"></i> Status: <span id="userStatus">Premium</span>`;
+  } else {
+    statusBadge.classList.add('bg-secondary', 'text-white');
+    statusBadge.innerHTML = `<i class="fas fa-user me-1"></i> Status: <span id="userStatus">Reguler</span>`;
+  }
+
+  // Badge di navbar
+  const navStatusBadge = document.getElementById('userStatusNav');
+  navStatusBadge.className = 'badge ms-2';
+
+  if (String(currentUser.status || '').toLowerCase() === 'premium') {
+    navStatusBadge.classList.add('bg-warning', 'text-dark');
+    navStatusBadge.textContent = 'Premium';
+  } else {
+    navStatusBadge.classList.add('bg-secondary');
+    navStatusBadge.textContent = 'Reguler';
+  }
+
+  // ✅ Premium expiry UI yang baru
+  const premiumExpiryEl = document.getElementById('premiumExpiry');
+  premiumExpiryEl.innerHTML = buildPremiumExpiryHtml(currentUser);
+}
+
+function isAbsoluteUrl(u) {
+  return /^https?:\/\//i.test(String(u || '').trim());
+}
+
+function normalizeImgUrl(u) {
+  const s = String(u || '').trim();
+  if (!s) return '';
+  if (isAbsoluteUrl(s)) return s;
+
+  // Kalau API kamu ngasih cuma filename, kamu bisa set BASE_URL sendiri:
+  // return `https://cdn.domainkamu.com/${s}`;
+
+  // Kalau belum ada base URL yang jelas, kembalikan kosong agar fallback dipakai
+  return '';
+}
 
         // Display videos
         function displayVideos(videoList) {
@@ -1799,7 +2233,7 @@ async function pay2000(description) {
             let html = '<div class="row">';
             
             videoList.forEach(video => {
-                const thumbnail = video.screenshot_thumbnail || 'https://via.placeholder.com/300x180?text=No+Thumbnail';
+                const thumbnail = normalizeImgUrl(video.screenshot_thumbnail) || 'https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';
                 const duration = video.durasi || 'Unknown';
                 const category = video.category || 'Uncategorized';
                 
@@ -2708,21 +3142,422 @@ async function unlockGameLink(domain, originalLink, adLink, token) {
         }
 
         // Switch tab
-        function switchTab(tabName) {
-            const tab = document.querySelector(`#${tabName}-tab`);
-            const bsTab = new bootstrap.Tab(tab);
-            bsTab.show();
-            
-            if (tabName === 'videos') {
-                document.getElementById('navVideos').classList.add('active');
-                document.getElementById('navGames').classList.remove('active');
-                if (videos.length === 0) loadVideos();
-            } else {
-                document.getElementById('navGames').classList.add('active');
-                document.getElementById('navVideos').classList.remove('active');
-                if (games.length === 0) loadGames();
-            }
-        }
+function switchTab(tabName) {
+  const tab = document.querySelector(`#${tabName}-tab`);
+  if (!tab) {
+    console.error('Tab not found:', `#${tabName}-tab`);
+    showToast('error', 'Tab Streaming belum terpasang (id salah / belum ada).');
+    return;
+  }
+
+  const bsTab = new bootstrap.Tab(tab);
+  bsTab.show();
+
+  document.getElementById('navVideos').classList.remove('active');
+  document.getElementById('navGames').classList.remove('active');
+  document.getElementById('navStreaming').classList.remove('active');
+
+  if (tabName === 'videos') {
+    document.getElementById('navVideos').classList.add('active');
+    if (videos.length === 0) loadVideos();
+  } else if (tabName === 'games') {
+    document.getElementById('navGames').classList.add('active');
+    if (games.length === 0) loadGames();
+  } else if (tabName === 'streaming') {
+    document.getElementById('navStreaming').classList.add('active');
+    if (streamings.length === 0) loadStreaming();
+  }
+}
+
+
+async function loadStreaming() {
+  showLoader(true, 'streamingList');
+
+  try {
+    // Ambil dari video database (Code GS kamu sudah punya action=getVideos)
+    const formData = new URLSearchParams();
+    formData.append('action', 'getVideos');
+
+    const response = await fetch(VIDEO_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData.toString()
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      const raw = result.data || [];
+
+      // Mapping: kolom "Link Video" => link_video => stream_url
+      streamings = raw.map(v => ({
+        id: v.row,
+        title: v.nama_video || 'Untitled',
+        category: v.category || 'Uncategorized',
+        thumbnail: normalizeImgUrl(v.screenshot_thumbnail) || '',
+        stream_url: (v.link_video || '').toString().trim(), // <=== INI ambil dari Link Video
+        ad_link: (v.link_iklan || '').toString().trim(),
+        durasi: v.durasi || ''
+      }));
+
+      populateStreamingCategoryFilter();
+      displayStreaming(streamings);
+    } else {
+      showToast('error', result.message || 'Failed to load streaming list');
+      document.getElementById('streamingList').innerHTML = `
+        <div class="text-center py-5">
+          <i class="fas fa-triangle-exclamation fa-3x text-muted"></i>
+          <h5 class="mt-3">Streaming list unavailable</h5>
+        </div>
+      `;
+    }
+  } catch (e) {
+    console.error(e);
+    showToast('error', 'Network error loading streaming');
+  } finally {
+    showLoader(false, 'streamingList');
+  }
+}
+
+function promptUnlockStreamingVideo(streamId) {
+  // cari item streamingnya
+  const item = (streamings || []).find(x => String(x.id) === String(streamId));
+  if (!item) {
+    showToast('error', 'Data streaming tidak ditemukan. Coba reload.');
+    return;
+  }
+
+  // kalau sudah unlocked, langsung play
+  if (isStreamingVideoUnlocked(streamId)) {
+    const encoded = encodeURIComponent(JSON.stringify(item)).replace(/'/g, "%27");
+    openStreamingPlayer(encoded);
+    return;
+  }
+
+  currentStreamingToUnlock = streamId;
+  currentStreamingItem = item;
+
+  const saldoNow = parseInt(currentUser?.saldo || 0, 10);
+  document.getElementById('currentBalanceStreaming').textContent = formatNumber(saldoNow);
+
+  const msgEl = document.getElementById('unlockStreamingMessage');
+  msgEl.innerHTML = `
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i>
+      <strong>Video:</strong> ${item.title || '-'}<br>
+      <strong>Biaya:</strong> Rp ${formatNumber(STREAMING_UNLOCK_PRICE)}
+    </div>
+  `;
+
+  const btn = document.getElementById('confirmUnlockStreamingBtn');
+  btn.disabled = saldoNow < STREAMING_UNLOCK_PRICE;
+
+  if (saldoNow < STREAMING_UNLOCK_PRICE) {
+    msgEl.innerHTML += `
+      <div class="alert alert-danger mt-2">
+        <i class="fas fa-exclamation-triangle"></i>
+        Saldo kurang. Butuh Rp ${formatNumber(STREAMING_UNLOCK_PRICE - saldoNow)} lagi.
+      </div>
+    `;
+  } else {
+    msgEl.innerHTML += `
+      <div class="alert alert-success mt-2">
+        <i class="fas fa-check-circle"></i> Saldo cukup untuk unlock video ini.
+      </div>
+    `;
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('unlockStreamingModal'));
+  modal.show();
+}
+
+
+function displayStreaming(list) {
+  const el = document.getElementById('streamingList');
+
+  if (!list || list.length === 0) {
+    el.innerHTML = `
+      <div class="text-center py-5">
+        <i class="fas fa-tv fa-3x text-muted"></i>
+        <h5 class="mt-3">No streaming found</h5>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '<div class="row">';
+  list.forEach(item => {
+    const thumb = item.thumbnail || 'https://via.placeholder.com/300x180?text=Streaming';
+    const cat = item.category || 'Uncategorized';
+    const title = item.title || 'Untitled';
+    const id = item.id; // row/video id
+
+    const unlocked = isStreamingVideoUnlocked(id);
+    const encoded = encodeURIComponent(JSON.stringify(item)).replace(/'/g, "%27");
+
+    html += `
+      <div class="col-md-4 col-lg-3 mb-4">
+        <div class="card" onclick="${unlocked ? `openStreamingPlayer('${encoded}')` : `promptUnlockStreamingVideo(${id})`}">
+          <img src="${thumb}" class="video-thumbnail" alt="${title}"
+            onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
+          <div class="card-body">
+            <h6 class="card-title">${title}</h6>
+            <p class="card-text small text-muted">
+              <span class="badge-category">${cat}</span>
+              ${unlocked ? `<span class="ms-2 text-success"><i class="fas fa-check-circle"></i> Unlocked</span>`
+                         : `<span class="ms-2 text-warning"><i class="fas fa-lock"></i> Rp 5.000</span>`}
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+
+
+
+
+function populateStreamingCategoryFilter() {
+  const sel = document.getElementById('streamingCategoryFilter');
+  if (!sel) return;
+
+  while (sel.options.length > 1) sel.remove(1);
+
+  const set = new Set();
+  streamings.forEach(x => { if (x.category) set.add(x.category); });
+
+  Array.from(set).sort().forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
+  });
+}
+
+function filterStreaming() {
+  const q = (document.getElementById('streamingSearch').value || '').toLowerCase();
+  const cat = document.getElementById('streamingCategoryFilter').value;
+
+  let filtered = streamings;
+
+  if (q) {
+    filtered = filtered.filter(x =>
+      String(x.title || '').toLowerCase().includes(q) ||
+      String(x.category || '').toLowerCase().includes(q)
+    );
+  }
+  if (cat) {
+    filtered = filtered.filter(x => String(x.category || '') === cat);
+  }
+
+  displayStreaming(filtered);
+}
+
+
+function promptUnlockStreaming() {
+  const saldoNow = parseInt(currentUser?.saldo || 0, 10);
+
+  document.getElementById('currentBalanceStreaming').textContent = formatNumber(saldoNow);
+
+  const msgEl = document.getElementById('unlockStreamingMessage');
+  msgEl.innerHTML = '';
+
+  const btn = document.getElementById('confirmUnlockStreamingBtn');
+  btn.disabled = false;
+
+  if (saldoNow >= STREAMING_UNLOCK_PRICE) {
+    msgEl.innerHTML = `
+      <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i> Saldo cukup untuk unlock fitur streaming.
+      </div>
+    `;
+  } else {
+    msgEl.innerHTML = `
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        Saldo kurang. Butuh Rp ${formatNumber(STREAMING_UNLOCK_PRICE - saldoNow)} lagi.
+      </div>
+    `;
+    btn.disabled = true;
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('unlockStreamingModal'));
+  modal.show();
+}
+
+async function confirmUnlockStreaming() {
+  const payBtn = document.getElementById('confirmUnlockStreamingBtn');
+
+  if (!currentStreamingToUnlock || !currentStreamingItem) {
+    showToast('error', 'Target unlock tidak valid.');
+    return;
+  }
+
+  const saldoBefore = parseInt(currentUser?.saldo || 0, 10);
+  if (saldoBefore < STREAMING_UNLOCK_PRICE) {
+    showToast('error', 'Insufficient balance');
+    return;
+  }
+
+  startPaymentLoading(payBtn, 'Processing payment...');
+  setModalButtonsDisabled('unlockStreamingModal', true);
+
+  try {
+    const streamId = currentStreamingToUnlock;
+
+    const result = await payAmount(
+      STREAMING_UNLOCK_PRICE,
+      `Unlock streaming video ID: ${streamId}`
+    );
+
+    await loadUserData();
+    const saldoAfter = parseInt(currentUser?.saldo || 0, 10);
+    const paymentConfirmed = (saldoAfter <= (saldoBefore - STREAMING_UNLOCK_PRICE));
+
+    if (result.status === 'success' || paymentConfirmed) {
+      setStreamingVideoUnlocked(streamId);
+
+      const unlockModal = bootstrap.Modal.getInstance(document.getElementById('unlockStreamingModal'));
+      if (unlockModal) unlockModal.hide();
+
+      showToast('success', 'Video unlocked! Saldo terpotong Rp 5.000.');
+
+      // refresh list supaya badge jadi Unlocked
+      displayStreaming(streamings);
+
+      // langsung play
+      const encoded = encodeURIComponent(JSON.stringify(currentStreamingItem)).replace(/'/g, "%27");
+      openStreamingPlayer(encoded);
+
+      currentStreamingToUnlock = null;
+      currentStreamingItem = null;
+    } else {
+      showToast('error', result.message || 'Failed to unlock streaming video');
+    }
+  } catch (e) {
+    console.error(e);
+    showToast('error', 'Network error');
+  } finally {
+    setModalButtonsDisabled('unlockStreamingModal', false);
+    stopPaymentLoading(payBtn);
+  }
+}
+
+
+
+function openStreamingPlayer(encodedJson) {
+  if (!isStreamingUnlocked()) {
+    showToast('warning', 'Fitur streaming masih terkunci');
+    return;
+  }
+
+  let item = null;
+  try {
+    item = JSON.parse(decodeURIComponent(encodedJson));
+  } catch {
+    showToast('error', 'Data streaming invalid');
+    return;
+  }
+
+  const title = item.title || 'Streaming';
+  const url = (item.stream_url || item.url || '').toString().trim();
+  const poster = item.thumbnail || '';
+
+  if (!url) {
+    showToast('error', 'Streaming URL kosong');
+    return;
+  }
+
+  const content = document.getElementById('streamingPlayerContent');
+  const isHls = url.toLowerCase().includes('.m3u8');
+
+  // Mirip contoh: pakai <video> + <source> untuk MP4
+  content.innerHTML = `
+    <h5 class="mb-3"><i class="fas fa-tv me-2"></i>${title}</h5>
+    <div class="ratio ratio-16x9">
+      ${
+        isHls
+          ? `<video id="streamVideoEl" controls autoplay playsinline ${poster ? `poster="${poster}"` : ''}></video>`
+          : `<video controls autoplay playsinline ${poster ? `poster="${poster}"` : ''}>
+               <source src="${url}" type="video/mp4">
+             </video>`
+      }
+    </div>
+    <div class="mt-3">
+      <small class="text-muted"><i class="fas fa-link me-1"></i>${url}</small>
+    </div>
+  `;
+
+  // Kalau HLS, baru set via hls.js
+  if (isHls) {
+    const videoEl = document.getElementById('streamVideoEl');
+
+    if (window.Hls && window.Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(videoEl);
+
+      const modalEl = document.getElementById('streamingPlayerModal');
+      const cleanup = () => {
+        try { hls.destroy(); } catch {}
+        modalEl.removeEventListener('hidden.bs.modal', cleanup);
+      };
+      modalEl.addEventListener('hidden.bs.modal', cleanup);
+    } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+      videoEl.src = url; // Safari native HLS
+    } else {
+      showToast('error', 'Browser tidak mendukung HLS streaming');
+      return;
+    }
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('streamingPlayerModal'));
+  modal.show();
+}
+
+
+
+// Load videos (WAJIB ADA)
+async function loadVideos() {
+  showLoader(true, 'videosList');
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append('action', 'getVideos'); // ✅ sesuaikan dengan Apps Script kamu
+
+    const response = await fetch(VIDEO_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData.toString()
+    });
+
+    const result = await response.json();
+
+    if (result.status === 'success') {
+      videos = result.data || [];
+      displayVideos(videos);
+      populateCategoryFilter();
+    } else {
+      showToast('error', result.message || 'Failed to load videos');
+      document.getElementById('videosList').innerHTML = `
+        <div class="text-center py-5">
+          <i class="fas fa-video-slash fa-3x text-muted"></i>
+          <h5 class="mt-3">Failed to load videos</h5>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Error loading videos:', error);
+    showToast('error', 'Network error loading videos');
+  } finally {
+    showLoader(false, 'videosList');
+  }
+}
+
 
         // Copy text to clipboard
         function copyToClipboard(inputId) {
