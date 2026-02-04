@@ -2196,84 +2196,110 @@ function saveUnlockState(state) {
     }
 
     // Load videos
-    async function loadVideos() {
-        showLoader(true, 'videosList');
+async function loadVideos() {
+    showLoader(true, 'videosList');
 
-        try {
-            const formData = new URLSearchParams();
-            formData.append('action', 'getVideos');
+    try {
+        const formData = new URLSearchParams();
+        formData.append('action', 'getVideos');
 
-            const response = await fetch(VIDEO_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData.toString()
+        const response = await fetch(VIDEO_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            videos = result.data || [];
+            
+            // ===== PERBAIKAN: Urutkan video terbaru dulu =====
+            // Asumsi: ID (row) lebih tinggi = video lebih baru
+            videos.sort((a, b) => {
+                // Coba konversi ke number
+                const idA = parseInt(a.row || a.id || 0);
+                const idB = parseInt(b.row || b.id || 0);
+                
+                // Urutkan dari tinggi ke rendah (terbaru ke terlama)
+                return idB - idA;
             });
-
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                videos = result.data || [];
-                displayVideos(videos);
-                populateCategoryFilter();
-            } else {
-                showToast('error', result.message || 'Failed to load videos');
-                document.getElementById('videosList').innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="fas fa-video-slash fa-3x text-muted"></i>
-                        <h5 class="mt-3">Failed to load videos</h5>
-                    </div>
-                `;
+            
+            // Atau jika ada timestamp:
+            // videos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            displayVideos(videos);
+            populateCategoryFilter();
+            
+            // Tampilkan notifikasi jumlah video terbaru
+            if (videos.length > 0) {
+                const newestVideo = videos[0];
+                console.log(`Video terbaru: ${newestVideo.nama_video} (ID: ${newestVideo.row})`);
             }
-        } catch (error) {
-            console.error('Error loading videos:', error);
-            showToast('error', 'Network error loading videos');
-        } finally {
-            showLoader(false, 'videosList');
-        }
-    }
-
-    // Display videos
-    function displayVideos(videoList) {
-        const videosListEl = document.getElementById('videosList');
-        
-        if (videoList.length === 0) {
-            videosListEl.innerHTML = `
+        } else {
+            showToast('error', result.message || 'Failed to load videos');
+            document.getElementById('videosList').innerHTML = `
                 <div class="text-center py-5">
                     <i class="fas fa-video-slash fa-3x text-muted"></i>
-                    <h5 class="mt-3">No videos found</h5>
+                    <h5 class="mt-3">Failed to load videos</h5>
                 </div>
             `;
-            return;
         }
+    } catch (error) {
+        console.error('Error loading videos:', error);
+        showToast('error', 'Network error loading videos');
+    } finally {
+        showLoader(false, 'videosList');
+    }
+}
+
+    // Display videos
+function displayVideos(videoList) {
+    const videosListEl = document.getElementById('videosList');
+    
+    if (videoList.length === 0) {
+        videosListEl.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-video-slash fa-3x text-muted"></i>
+                <h5 class="mt-3">No videos found</h5>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="row">';
+    
+    videoList.forEach((video, index) => {
+        const thumbnail = normalizeImgUrl(video.screenshot_thumbnail) || 'https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';
+        const duration = video.durasi || 'Unknown';
+        const category = video.category || 'Uncategorized';
         
-        let html = '<div class="row">';
+        // ===== TAMBAHKAN BADGE VIDEO TERBARU =====
+        const isNewest = index === 0; // Video pertama adalah terbaru
+        const newBadge = isNewest ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">TERBARU</span>' : '';
         
-        videoList.forEach(video => {
-            const thumbnail = normalizeImgUrl(video.screenshot_thumbnail) || 'https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';
-            const duration = video.durasi || 'Unknown';
-            const category = video.category || 'Uncategorized';
-            
-            html += `
-                <div class="col-md-4 col-lg-3 mb-4">
-                    <div class="card video-item" onclick="showVideoDetail(${video.row})">
-                        <img src="${thumbnail}" class="video-thumbnail" alt="${video.nama_video}"
-                            onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
-                        <div class="card-body">
-                            <h6 class="card-title">${video.nama_video}</h6>
-                            <p class="card-text small text-muted">
-                                <i class="fas fa-clock"></i> ${duration} <br>
-                                <span class="badge-category">${category}</span>
-                            </p>
-                            ${!currentUser ? `<small class="text-warning"><i class="fas fa-info-circle"></i> Login to unlock premium</small>` : ''}
-                        </div>
+        html += `
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card video-item position-relative" onclick="showVideoDetail(${video.row})">
+                    ${newBadge}
+                    <img src="${thumbnail}" class="video-thumbnail" alt="${video.nama_video}"
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
+                    <div class="card-body">
+                        <h6 class="card-title">${video.nama_video}</h6>
+                        <p class="card-text small text-muted">
+                            <i class="fas fa-clock"></i> ${duration} <br>
+                            <span class="badge-category">${category}</span>
+                        </p>
+                        ${!currentUser ? `<small class="text-warning"><i class="fas fa-info-circle"></i> Login to unlock premium</small>` : ''}
                     </div>
                 </div>
-            `;
-        });
-        
-        html += '</div>';
-        videosListEl.innerHTML = html;
-    }
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    videosListEl.innerHTML = html;
+}
 
     // Show video detail
     async function showVideoDetail(rowNumber) {
@@ -2913,54 +2939,65 @@ function saveUnlockState(state) {
     }
 
     // Load streaming
-    async function loadStreaming() {
-        showLoader(true, 'streamingList');
+async function loadStreaming() {
+    showLoader(true, 'streamingList');
 
-        try {
-            const formData = new URLSearchParams();
-            formData.append('action', 'getVideos');
+    try {
+        const formData = new URLSearchParams();
+        formData.append('action', 'getVideos');
 
-            const response = await fetch(VIDEO_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData.toString()
+        const response = await fetch(VIDEO_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            const raw = result.data || [];
+            
+            // ===== PERBAIKAN: Urutkan streaming terbaru dulu =====
+            // Sort by ID descending (terbaru dulu)
+            raw.sort((a, b) => {
+                const idA = parseInt(a.row || a.id || 0);
+                const idB = parseInt(b.row || b.id || 0);
+                return idB - idA;
             });
+            
+            streamings = raw.map(v => ({
+                id: v.row,
+                title: v.nama_video || 'Untitled',
+                category: v.category || 'Uncategorized',
+                thumbnail: normalizeImgUrl(v.screenshot_thumbnail) || '',
+                stream_url: (v.link_video || '').toString().trim(),
+                ad_link: (v.link_iklan || '').toString().trim(),
+                durasi: v.durasi || ''
+            }));
 
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                const raw = result.data || [];
-                streamings = raw.map(v => ({
-                    id: v.row,
-                    title: v.nama_video || 'Untitled',
-                    category: v.category || 'Uncategorized',
-                    thumbnail: normalizeImgUrl(v.screenshot_thumbnail) || '',
-                    stream_url: (v.link_video || '').toString().trim(),
-                    ad_link: (v.link_iklan || '').toString().trim(),
-                    durasi: v.durasi || ''
-                }));
-
-                populateStreamingCategoryFilter();
-                displayStreaming(streamings);
-            } else {
-                showToast('error', result.message || 'Failed to load streaming list');
-                document.getElementById('streamingList').innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="fas fa-triangle-exclamation fa-3x text-muted"></i>
-                        <h5 class="mt-3">Streaming list unavailable</h5>
-                    </div>
-                `;
-            }
-        } catch (e) {
-            console.error(e);
-            showToast('error', 'Network error loading streaming');
-        } finally {
-            showLoader(false, 'streamingList');
+            populateStreamingCategoryFilter();
+            displayStreaming(streamings);
+            
+            // Tampilkan jumlah streaming terbaru di console
+            console.log(`Loaded ${streamings.length} streaming videos, newest ID: ${streamings[0]?.id || 'N/A'}`);
+        } else {
+            showToast('error', result.message || 'Failed to load streaming list');
+            document.getElementById('streamingList').innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-triangle-exclamation fa-3x text-muted"></i>
+                    <h5 class="mt-3">Streaming list unavailable</h5>
+                </div>
+            `;
         }
+    } catch (e) {
+        console.error(e);
+        showToast('error', 'Network error loading streaming');
+    } finally {
+        showLoader(false, 'streamingList');
     }
+}
 
     // Display streaming
-// Display streaming - VERSI DIPERBAIKI
 function displayStreaming(list) {
     const el = document.getElementById('streamingList');
 
@@ -2976,24 +3013,25 @@ function displayStreaming(list) {
 
     let html = '<div class="row">';
 
-    list.forEach(item => {
+    list.forEach((item, index) => {
         const thumb = item.thumbnail || 'https://via.placeholder.com/300x180?text=Streaming';
         const cat = item.category || 'Uncategorized';
         const title = item.title || 'Untitled';
         const id = item.id;
         
+        // ===== TAMBAHKAN BADGE STREAMING TERBARU =====
+        const isNewest = index === 0;
+        const newBadge = isNewest ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">TERBARU</span>' : '';
+        
         // Encode item data untuk player
         const encoded = encodeURIComponent(JSON.stringify(item)).replace(/'/g, "%27");
 
-        // Debug: Log status user
-        console.log('User Status:', currentUser ? 'Logged in' : 'Guest');
-        console.log('Stream ID:', id);
-
-        // Guest users - TAMPILKAN CARD YANG LOCKED DENGAN OVERLAY LOGIN
+        // Guest users
         if (!currentUser) {
             html += `
                 <div class="col-md-4 col-lg-3 mb-4">
-                    <div class="card streaming-card">
+                    <div class="card streaming-card position-relative">
+                        ${newBadge}
                         <span class="login-required-badge">Login Required</span>
                         <img src="${thumb}" class="video-thumbnail" alt="${title}"
                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
@@ -3010,24 +3048,16 @@ function displayStreaming(list) {
         } 
         // Logged in users
         else {
-            console.log('User is logged in, checking premium/unlock status...');
-            
-            // Periksa apakah user premium
             const userStatus = String(currentUser?.status || '').toLowerCase();
             const isPremium = userStatus === 'premium';
-            console.log('Is Premium:', isPremium);
-            
-            // Periksa apakah streaming sudah unlocked
             const unlocked = isPremium || isStreamingVideoUnlocked(id);
-            console.log('Stream Unlocked:', unlocked);
-            console.log('Stream ID for unlock check:', id);
             
             if (unlocked) {
                 // Streaming sudah unlocked - langsung bisa diputar
-                console.log('Stream is unlocked, showing player button');
                 html += `
                     <div class="col-md-4 col-lg-3 mb-4">
-                        <div class="card streaming-card" onclick="openStreamingPlayer('${encoded}')">
+                        <div class="card streaming-card position-relative" onclick="openStreamingPlayer('${encoded}')">
+                            ${newBadge}
                             <img src="${thumb}" class="video-thumbnail" alt="${title}"
                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
                             <div class="card-body">
@@ -3041,11 +3071,11 @@ function displayStreaming(list) {
                     </div>
                 `;
             } else {
-                // Streaming belum unlocked - tampilkan card dengan overlay unlock
-                console.log('Stream is locked, showing unlock option');
+                // Streaming belum unlocked
                 html += `
                     <div class="col-md-4 col-lg-3 mb-4">
-                        <div class="card streaming-card" onclick="showStreamingDetailModal(${id})">
+                        <div class="card streaming-card position-relative" onclick="showStreamingDetailModal(${id})">
+                            ${newBadge}
                             <img src="${thumb}" class="video-thumbnail" alt="${title}"
                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
                             <div class="card-body">
