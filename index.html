@@ -1152,6 +1152,56 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
+        
+        .view-count {
+          font-weight: 600;
+          font-size: 0.85rem;
+        }
+
+        .hot-badge {
+          animation: pulse 1.5s infinite;
+          z-index: 10;
+        }
+
+        .popular-badge {
+          background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+          color: white;
+          padding: 3px 8px;
+          border-radius: 10px;
+          font-size: 0.7rem;
+          font-weight: bold;
+          position: absolute;
+          top: 5px;
+          left: 5px;
+          z-index: 5;
+        }
+
+        .trending-up {
+          color: #2ecc71;
+        }
+
+        .trending-down {
+          color: #e74c3c;
+        }
+
+        /* Tooltip untuk view stats */
+        .view-stats-tooltip {
+          position: absolute;
+          background: rgba(0, 0, 0, 0.9);
+          color: white;
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          z-index: 1000;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.3s;
+          min-width: 150px;
+        }
+
+        .view-count-badge:hover + .view-stats-tooltip {
+          opacity: 1;
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -1619,6 +1669,7 @@
     const USER_API_URL = "https://script.google.com/macros/s/AKfycbweRCcVmuWrz2gpvIanBqeIsyubAUgOjSssHhnXBW3WUiOu9QbNeUq-y4-9Ps6BuQ8L/exec";
     const APKSGI_API_URL = "https://script.google.com/macros/s/AKfycbyEs1aAA04pv7teozEtBc8cafX_wghPenjpBT_V9LQRl6f9Mk34n4mcDYUW9iWYLd-p/exec";
     const VIDEO_API_URL = "https://script.google.com/macros/s/AKfycbw8XawygP708y86ZogLGEpUxWiB-dRFbpNefjJDGOm5Juudue-zPkorMo4O9w0L3rgvAA/exec";
+    const COUNT_API_URL = "https://script.google.com/macros/s/AKfycbw7us6zDMnAYj_hLv1UwmCpIIHuwcX2avN5Nlf94tQ4mPIlX7I8s_tJh-2rkb6z9kY/exec";
 
     // Global variables
     let currentUser = null;
@@ -1634,6 +1685,12 @@
     let currentStreamingToUnlock = null;
     let currentStreamingItem = null;
     let authNonce = 0; // naik setiap login/logout, untuk membatalkan request lama
+let countCache = {
+  data: {},
+  lastUpdated: 0,
+  ttl: 60000 // 1 menit cache
+};
+
 
     const STREAMING_UNLOCK_PRICE = 2500;
     const PREMIUM_TOPUP_URL = "https://www.indapk.com/topup.html";
@@ -1705,6 +1762,7 @@ document.getElementById('confirmUnlockStreamingBtn').addEventListener('click', f
         
         // Load initial content
         loadVideos();
+        loadAllViewCounts();
     });
 
     // Check login status
@@ -1723,6 +1781,111 @@ document.getElementById('confirmUnlockStreamingBtn').addEventListener('click', f
             updateUIForGuest();
         }
     }
+
+// Function untuk increment count (ASYNC - tidak blocking UI)
+async function trackView(type, itemId, itemName = "", platform = "") {
+  try {
+    // Update cache lokal terlebih dahulu untuk responsif UI
+    const cacheKey = `${type}_${itemId}`;
+    if (!countCache.data[cacheKey]) {
+      countCache.data[cacheKey] = { total: 0, daily: 0 };
+    }
+    countCache.data[cacheKey].total += 1;
+    countCache.data[cacheKey].daily += 1;
+    
+    // Update UI segera (tanpa menunggu API response)
+    updateViewCountUI(type, itemId);
+    
+    // Kirim ke API di background (tidak blocking)
+    setTimeout(async () => {
+      try {
+        await fetch(COUNT_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `action=incrementCount&type=${type}&itemId=${itemId}&itemName=${encodeURIComponent(itemName)}&platform=${platform}`
+        });
+      } catch (error) {
+        console.log('Background count update failed:', error);
+      }
+    }, 0);
+    
+  } catch (error) {
+    console.error('Error tracking view:', error);
+  }
+}
+
+// Function untuk update UI count
+function updateViewCountUI(type, itemId) {
+  const cacheKey = `${type}_${itemId}`;
+  const countData = countCache.data[cacheKey];
+  
+  if (!countData) return;
+  
+  // Update semua element dengan data-item-id yang sama
+  document.querySelectorAll(`[data-item-id="${itemId}"]`).forEach(element => {
+    const countElement = element.querySelector('.view-count');
+    if (countElement) {
+      countElement.textContent = formatCount(countData.total);
+    }
+    
+    // Jika ada badge "hot" untuk item populer
+    if (countData.total > 100) {
+      const hotBadge = element.querySelector('.hot-badge');
+      if (!hotBadge && countData.total > 100) {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-danger position-absolute top-0 start-0 m-2 hot-badge';
+        badge.textContent = '🔥 HOT';
+        element.querySelector('.card').appendChild(badge);
+      }
+    }
+  });
+}
+
+// Function untuk preload counts saat halaman dimuat
+async function loadAllViewCounts() {
+  try {
+    const response = await fetch(`${COUNT_API_URL}?action=getAllCounts`);
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      // Update cache
+      result.data.forEach(item => {
+        const cacheKey = `${item.Type}_${item.ItemID}`;
+        countCache.data[cacheKey] = {
+          total: item.TotalCount || 0,
+          daily: item.DailyCount || 0,
+          weekly: item.WeeklyCount || 0,
+          monthly: item.MonthlyCount || 0
+        };
+      });
+      
+      countCache.lastUpdated = Date.now();
+      
+      // Update semua UI
+      updateAllViewCountsUI();
+    }
+  } catch (error) {
+    console.error('Error loading view counts:', error);
+  }
+}
+
+// Update semua UI dengan data dari cache
+function updateAllViewCountsUI() {
+  Object.keys(countCache.data).forEach(cacheKey => {
+    const [type, itemId] = cacheKey.split('_');
+    updateViewCountUI(type, itemId);
+  });
+}
+
+// Format count untuk display
+function formatCount(count) {
+  if (!count) return '0';
+  if (count >= 1000000) return (count / 1000000).toFixed(1) + 'M';
+  if (count >= 1000) return (count / 1000).toFixed(1) + 'K';
+  return count.toString();
+}
 
     // Update UI for guest user
     function updateUIForGuest() {
@@ -2255,55 +2418,62 @@ async function loadVideos() {
 
     // Display videos
 function displayVideos(videoList) {
-    const videosListEl = document.getElementById('videosList');
+  const videosListEl = document.getElementById('videosList');
+  
+  if (videoList.length === 0) {
+    videosListEl.innerHTML = `
+      <div class="text-center py-5">
+        <i class="fas fa-video-slash fa-3x text-muted"></i>
+        <h5 class="mt-3">No videos found</h5>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '<div class="row">';
+  
+  videoList.forEach((video, index) => {
+    const thumbnail = normalizeImgUrl(video.screenshot_thumbnail) || 'https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';
+    const duration = video.durasi || 'Unknown';
+    const category = video.category || 'Uncategorized';
+    const cacheKey = `videos_${video.row}`;
+    const viewCount = countCache.data[cacheKey]?.total || 0;
     
-    if (videoList.length === 0) {
-        videosListEl.innerHTML = `
-            <div class="text-center py-5">
-                <i class="fas fa-video-slash fa-3x text-muted"></i>
-                <h5 class="mt-3">No videos found</h5>
-            </div>
-        `;
-        return;
-    }
-    
-    let html = '<div class="row">';
-    
-    videoList.forEach((video, index) => {
-        const thumbnail = normalizeImgUrl(video.screenshot_thumbnail) || 'https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';
-        const duration = video.durasi || 'Unknown';
-        const category = video.category || 'Uncategorized';
-        
-        // ===== TAMBAHKAN BADGE VIDEO TERBARU =====
-        const isNewest = index === 0; // Video pertama adalah terbaru
-        const newBadge = isNewest ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">TERBARU</span>' : '';
-        
-        html += `
-            <div class="col-md-4 col-lg-3 mb-4">
-                <div class="card video-item position-relative" onclick="showVideoDetail(${video.row})">
-                    ${newBadge}
-                    <img src="${thumbnail}" class="video-thumbnail" alt="${video.nama_video}"
-                        onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
-                    <div class="card-body">
-                        <h6 class="card-title">${video.nama_video}</h6>
-                        <p class="card-text small text-muted">
-                            <i class="fas fa-clock"></i> ${duration} <br>
-                            <span class="badge-category">${category}</span>
-                        </p>
-                        ${!currentUser ? `<small class="text-warning"><i class="fas fa-info-circle"></i> Login to unlock premium</small>` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    videosListEl.innerHTML = html;
+    html += `
+      <div class="col-md-4 col-lg-3 mb-4" data-item-id="${video.row}">
+        <div class="card video-item position-relative" onclick="showVideoDetail(${video.row})">
+          ${index === 0 ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">TERBARU</span>' : ''}
+          <div class="position-absolute top-0 end-0 m-2">
+            <span class="badge bg-dark opacity-75">
+              <i class="fas fa-eye me-1"></i> <span class="view-count">${formatCount(viewCount)}</span>
+            </span>
+          </div>
+          <img src="${thumbnail}" class="video-thumbnail" alt="${video.nama_video}"
+            onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
+          <div class="card-body">
+            <h6 class="card-title">${video.nama_video}</h6>
+            <p class="card-text small text-muted">
+              <i class="fas fa-clock"></i> ${duration} <br>
+              <span class="badge-category">${category}</span>
+            </p>
+            ${!currentUser ? `<small class="text-warning"><i class="fas fa-info-circle"></i> Login to unlock premium</small>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  videosListEl.innerHTML = html;
 }
 
     // Show video detail
     async function showVideoDetail(rowNumber) {
         showGlobalLoading('Loading video...');
+      const video = videos.find(v => v.row == rowNumber);
+      if (video) {
+        trackView('videos', rowNumber, video.nama_video, video.category || 'video');
+      }
 
         try {
             const formData = new URLSearchParams();
@@ -2647,6 +2817,10 @@ function displayVideos(videoList) {
     // Show game detail
     async function showGameDetail(gameId, showVersionSelector = false) {
         showGlobalLoading('Loading game...');
+  const game = games.find(g => g.id == gameId);
+  if (game) {
+    trackView('games', gameId, game.nama_game, game.category || 'game');
+  }
 
         try {
             const formData = new URLSearchParams();
@@ -3096,7 +3270,29 @@ function displayStreaming(list) {
     el.innerHTML = html;
 }
 
-
+// Fungsi untuk update counter video terbaru
+function updateNewVideoCounter() {
+    const counterEl = document.getElementById('newVideoCounter');
+    if (!counterEl) return;
+    
+    // Hitung video yang ditambahkan hari ini (contoh logika)
+    const today = new Date().toISOString().split('T')[0];
+    const newVideosCount = videos.filter(v => {
+        // Asumsi video memiliki timestamp
+        const videoDate = v.timestamp ? v.timestamp.split(' ')[0] : null;
+        return videoDate === today;
+    }).length;
+    
+    if (newVideosCount > 0) {
+        counterEl.innerHTML = `
+            <span class="badge bg-danger animate__animated animate__pulse">
+                <i class="fas fa-fire"></i> ${newVideosCount} BARU HARI INI
+            </span>
+        `;
+    } else {
+        counterEl.innerHTML = '';
+    }
+}
 
 // Fungsi untuk menampilkan detail streaming (thumbnail, deskripsi, tombol unlock)
 async function showStreamingDetailModal(streamId) {
@@ -4079,6 +4275,8 @@ async function confirmUnlockStreamingVideo() {
     function openStreamingPlayer(itemData) {
         try {
             const item = JSON.parse(decodeURIComponent(itemData));
+            // Track view count
+            trackView('streaming', item.id, item.title, item.category || 'streaming');
             const playerContent = document.getElementById('streamingPlayerContent');
             
             playerContent.innerHTML = `
