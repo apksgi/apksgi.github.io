@@ -1152,7 +1152,7 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-        
+
         .view-count {
           font-weight: 600;
           font-size: 0.85rem;
@@ -1201,6 +1201,10 @@
 
         .view-count-badge:hover + .view-stats-tooltip {
           opacity: 1;
+        }
+        .view-count {
+            font-weight: 600;
+            font-size: 0.85rem;
         }
     </style>
 </head>
@@ -1792,6 +1796,9 @@ async function trackView(type, itemId, itemName = "", platform = "") {
     }
     countCache.data[cacheKey].total += 1;
     countCache.data[cacheKey].daily += 1;
+    if (type === 'streaming') {
+        updateViewCountUI('streaming', itemId);
+    }
     
     // Update UI segera (tanpa menunggu API response)
     updateViewCountUI(type, itemId);
@@ -3193,6 +3200,10 @@ function displayStreaming(list) {
         const title = item.title || 'Untitled';
         const id = item.id;
         
+        // ===== TAMBAHKAN: Ambil view count dari cache =====
+        const cacheKey = `streaming_${id}`;
+        const viewCount = countCache.data[cacheKey]?.total || 0;
+        
         // ===== TAMBAHKAN BADGE STREAMING TERBARU =====
         const isNewest = index === 0;
         const newBadge = isNewest ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">TERBARU</span>' : '';
@@ -3203,9 +3214,16 @@ function displayStreaming(list) {
         // Guest users
         if (!currentUser) {
             html += `
-                <div class="col-md-4 col-lg-3 mb-4">
+                <div class="col-md-4 col-lg-3 mb-4" data-item-id="${id}">
                     <div class="card streaming-card position-relative">
                         ${newBadge}
+                        <!-- VIEW COUNT BADGE -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-dark opacity-75">
+                                <i class="fas fa-eye me-1"></i> 
+                                <span class="view-count">${formatCount(viewCount)}</span>
+                            </span>
+                        </div>
                         <span class="login-required-badge">Login Required</span>
                         <img src="${thumb}" class="video-thumbnail" alt="${title}"
                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
@@ -3229,9 +3247,16 @@ function displayStreaming(list) {
             if (unlocked) {
                 // Streaming sudah unlocked - langsung bisa diputar
                 html += `
-                    <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="col-md-4 col-lg-3 mb-4" data-item-id="${id}">
                         <div class="card streaming-card position-relative" onclick="openStreamingPlayer('${encoded}')">
                             ${newBadge}
+                            <!-- VIEW COUNT BADGE -->
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-dark opacity-75">
+                                    <i class="fas fa-eye me-1"></i> 
+                                    <span class="view-count">${formatCount(viewCount)}</span>
+                                </span>
+                            </div>
                             <img src="${thumb}" class="video-thumbnail" alt="${title}"
                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
                             <div class="card-body">
@@ -3247,9 +3272,16 @@ function displayStreaming(list) {
             } else {
                 // Streaming belum unlocked
                 html += `
-                    <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="col-md-4 col-lg-3 mb-4" data-item-id="${id}">
                         <div class="card streaming-card position-relative" onclick="showStreamingDetailModal(${id})">
                             ${newBadge}
+                            <!-- VIEW COUNT BADGE -->
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-dark opacity-75">
+                                    <i class="fas fa-eye me-1"></i> 
+                                    <span class="view-count">${formatCount(viewCount)}</span>
+                                </span>
+                            </div>
                             <img src="${thumb}" class="video-thumbnail" alt="${title}"
                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
                             <div class="card-body">
