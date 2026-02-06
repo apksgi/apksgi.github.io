@@ -1206,6 +1206,44 @@
             font-weight: 600;
             font-size: 0.85rem;
         }
+
+        /* Badge TERBARU untuk game */
+        .game-item .badge.bg-danger.position-absolute {
+            z-index: 5;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 6px 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Animation untuk badge TERBARU */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Image loading animation */
+        .game-thumb-wrap img, .video-thumbnail {
+            background: linear-gradient(90deg, var(--bg-primary) 25%, var(--border-color) 50%, var(--bg-primary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Improve image display */
+        img {
+            transition: opacity 0.3s ease;
+        }
+
+        img[src*="placeholder"] {
+            object-fit: contain !important;
+            padding: 20px;
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -1705,6 +1743,7 @@ let countCache = {
     const themeTarget = document.body;
     const globalLoadingEl = document.getElementById('globalLoading');
     const globalLoadingTextEl = document.getElementById('globalLoadingText');
+const IMAGE_PROXY_URL = 'https://images.weserv.nl/';
 
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -1768,6 +1807,82 @@ document.getElementById('confirmUnlockStreamingBtn').addEventListener('click', f
         loadVideos();
         loadAllViewCounts();
     });
+
+function loadImageWithProxy(imgElement, originalUrl, fallbackText = 'Image not available') {
+    if (!originalUrl || !imgElement) return;
+    
+    // Jika URL sudah menggunakan proxy, langsung pakai
+    if (originalUrl.includes('images.weserv.nl') || 
+        originalUrl.includes('corsproxy.io') ||
+        originalUrl.includes('allorigins.win')) {
+        imgElement.src = originalUrl;
+        return;
+    }
+    
+    // Coba URL asli dulu
+    imgElement.src = originalUrl;
+    
+    // Setup error handler untuk fallback ke proxy
+    imgElement.onerror = function() {
+        console.log('Original image failed, trying proxy for:', originalUrl);
+        
+        try {
+            // Encode URL untuk proxy
+            const encodedUrl = encodeURIComponent(originalUrl);
+            
+            // Pilihan proxy (gunakan salah satu):
+            // 1. images.weserv.nl (direkomendasikan)
+            let proxyUrl = `${IMAGE_PROXY_URL}?url=${encodedUrl}&w=800&h=450&fit=cover&output=jpg&q=80`;
+            
+            // 2. Alternatif: corsproxy.io
+            // let proxyUrl = `https://corsproxy.io/?${encodedUrl}`;
+            
+            // 3. Alternatif: allorigins.win
+            // let proxyUrl = `https://api.allorigins.win/raw?url=${encodedUrl}`;
+            
+            imgElement.src = proxyUrl;
+            
+            // Jika proxy juga gagal, gunakan placeholder
+            imgElement.onerror = function() {
+                console.log('Proxy also failed for:', originalUrl);
+                imgElement.src = `https://via.placeholder.com/800x450/1e293b/94a3b8?text=${encodeURIComponent(fallbackText)}`;
+                imgElement.style.objectFit = 'contain';
+                imgElement.style.padding = '20px';
+            };
+        } catch (err) {
+            console.error('Error setting up proxy:', err);
+            imgElement.src = `https://via.placeholder.com/800x450/1e293b/94a3b8?text=Error+loading`;
+        }
+    };
+    
+    // Setup success handler
+    imgElement.onload = function() {
+        console.log('Image loaded successfully:', originalUrl);
+    };
+}
+function getProxyImageUrl(originalUrl, width = 800, height = 450) {
+    if (!originalUrl) return '';
+    
+    // Jika sudah proxy, langsung return
+    if (originalUrl.includes('images.weserv.nl')) return originalUrl;
+    
+    try {
+        const encodedUrl = encodeURIComponent(originalUrl);
+        return `${IMAGE_PROXY_URL}?url=${encodedUrl}&w=${width}&h=${height}&fit=cover&output=jpg&q=85`;
+    } catch (error) {
+        console.error('Error creating proxy URL:', error);
+        return originalUrl; // Fallback ke URL asli
+    }
+}
+function normalizeImgUrlWithProxy(url, fallbackText = 'Image') {
+    const original = normalizeImgUrl(url);
+    if (!original) {
+        return `https://via.placeholder.com/800x450/1e293b/94a3b8?text=${encodeURIComponent(fallbackText)}`;
+    }
+    
+    // Langsung return proxy URL untuk menghindari CORS
+    return getProxyImageUrl(original);
+}
 
     // Check login status
     function checkLoginStatus() {
@@ -2440,7 +2555,11 @@ function displayVideos(videoList) {
   let html = '<div class="row">';
   
   videoList.forEach((video, index) => {
-    const thumbnail = normalizeImgUrl(video.screenshot_thumbnail) || 'https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';
+    // Gunakan proxy untuk thumbnail
+    const originalThumb = normalizeImgUrl(video.screenshot_thumbnail);
+    const proxyThumb = originalThumb ? getProxyImageUrl(originalThumb, 300, 180) : 
+      'https://via.placeholder.com/300x180/1e293b/94a3b8?text=Video+Thumbnail';
+    
     const duration = video.durasi || 'Unknown';
     const category = video.category || 'Uncategorized';
     const cacheKey = `videos_${video.row}`;
@@ -2455,8 +2574,9 @@ function displayVideos(videoList) {
               <i class="fas fa-eye me-1"></i> <span class="view-count">${formatCount(viewCount)}</span>
             </span>
           </div>
-          <img src="${thumbnail}" class="video-thumbnail" alt="${video.nama_video}"
-            onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
+          <img src="${proxyThumb}" class="video-thumbnail" alt="${video.nama_video}"
+            loading="lazy"
+            onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180/1e293b/94a3b8?text=Thumbnail+Error';">
           <div class="card-body">
             <h6 class="card-title">${video.nama_video}</h6>
             <p class="card-text small text-muted">
@@ -2509,19 +2629,22 @@ function displayVideos(videoList) {
     }
 
     // Display video detail
-    function displayVideoDetail(video) {
-        const modalContent = document.getElementById('videoDetailContent');
+function displayVideoDetail(video) {
+    const modalContent = document.getElementById('videoDetailContent');
 
-        const thumbnail = video.screenshot_thumbnail || 'https://via.placeholder.com/800x450?text=No+Thumbnail';
-        const adLink = video.link_iklan || '';
-        const originalLink = video.link_original || video.link_video || video.original_link || video.original || '';
+    // Gunakan proxy untuk thumbnail detail
+    const originalThumb = video.screenshot_thumbnail || '';
+    const proxyThumb = originalThumb ? getProxyImageUrl(originalThumb, 800, 450) : 
+        'https://via.placeholder.com/800x450/1e293b/94a3b8?text=Video+Thumbnail';
+    
+    const adLink = video.link_iklan || '';
+    const originalLink = video.link_original || video.link_video || video.original_link || video.original || '';
 
-        const isPremium = currentUser && String(currentUser?.status || '').toLowerCase() === 'premium';
-        const alreadyUnlocked = isPremium || isVideoUnlocked(video.row);
-        const canPayNow = currentUser && (parseInt(currentUser?.saldo || 0, 10) >= 1000);
+    const isPremium = currentUser && String(currentUser?.status || '').toLowerCase() === 'premium';
+    const alreadyUnlocked = isPremium || isVideoUnlocked(video.row);
+    const canPayNow = currentUser && (parseInt(currentUser?.saldo || 0, 10) >= 1000);
 
-        let originalLinkHtml = '';
-
+    let originalLinkHtml = '';
         // Guest user
         if (!currentUser) {
             originalLinkHtml = `
@@ -2581,40 +2704,39 @@ function displayVideos(videoList) {
                 `;
             }
         }
+    modalContent.innerHTML = `
+        <div class="text-center mb-4">
+            <img src="${proxyThumb}" class="img-fluid rounded" alt="${video.nama_video}"
+                style="max-height: 300px;"
+                onerror="this.onerror=null; this.src='https://via.placeholder.com/800x450/1e293b/94a3b8?text=Thumbnail+Error';">
+        </div>
 
-        modalContent.innerHTML = `
-            <div class="text-center mb-4">
-                <img src="${thumbnail}" class="img-fluid rounded" alt="${video.nama_video}"
-                    style="max-height: 300px;"
-                    onerror="this.onerror=null; this.src='https://via.placeholder.com/800x450?text=Use+VPN+to+load+thumbnail';">
+        <h4>🎬 ${video.nama_video}</h4>
+        <div class="text-center mb-3">${Array(30).fill('━').join('')}</div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <p><i class="fas fa-clock"></i> <strong>Duration:</strong> ${video.durasi || 'Unknown'}</p>
+                <p><i class="fas fa-folder"></i> <strong>Category:</strong> ${video.category || 'Uncategorized'}</p>
             </div>
+        </div>
 
-            <h4>🎬 ${video.nama_video}</h4>
-            <div class="text-center mb-3">${Array(30).fill('━').join('')}</div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-clock"></i> <strong>Duration:</strong> ${video.durasi || 'Unknown'}</p>
-                    <p><i class="fas fa-folder"></i> <strong>Category:</strong> ${video.category || 'Uncategorized'}</p>
-                </div>
+        <div class="mb-3">
+            <strong><i class="fas fa-ad"></i> Ad Link:</strong>
+            <div class="input-group mt-1">
+                <input type="text" class="form-control" id="adLink" value="${adLink}" readonly>
+                <button class="btn btn-outline-secondary" onclick="copyToClipboard('adLink')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
+        </div>
 
-            <div class="mb-3">
-                <strong><i class="fas fa-ad"></i> Ad Link:</strong>
-                <div class="input-group mt-1">
-                    <input type="text" class="form-control" id="adLink" value="${adLink}" readonly>
-                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('adLink')">
-                        <i class="fas fa-copy"></i> Copy
-                    </button>
-                </div>
-            </div>
+        ${originalLinkHtml}
+    `;
 
-            ${originalLinkHtml}
-        `;
-
-        const modal = new bootstrap.Modal(document.getElementById('videoDetailModal'));
-        modal.show();
-    }
+    const modal = new bootstrap.Modal(document.getElementById('videoDetailModal'));
+    modal.show();
+}
 
     // Prompt to unlock video
     function promptUnlockVideo(rowNumber) {
@@ -2730,91 +2852,100 @@ function displayVideos(videoList) {
     }
 
     // Display games
-    function displayGames(gameList) {
-        const gamesListEl = document.getElementById('gamesList');
+function displayGames(gameList) {
+    const gamesListEl = document.getElementById('gamesList');
+    
+    if (gameList.length === 0) {
+        gamesListEl.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-gamepad fa-3x text-muted"></i>
+                <h5 class="mt-3">No games found</h5>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="row">';
+    
+    // ===== PERUBAHAN: Tampilkan game terbaru dengan badge "TERBARU" =====
+    gameList.forEach((game, index) => {
+        const platform = game.nama_game.includes('APK') ? 'APK' :
+                        game.nama_game.includes('PC') ? 'PC' : 'Unknown';
+
+        let baseName = game.nama_game;
+        const versionMatch = game.nama_game.match(/\[(v\d+\.\d+(\.\d+)?)\]/);
+        const version = versionMatch ? versionMatch[1] : '';
+
+        if (version) baseName = baseName.replace(`[${version}]`, '').trim();
+        baseName = baseName.replace(' APK', '').replace(' PC', '').trim();
+
+        const hasMultipleVersions = games.filter(g =>
+            g.nama_game.includes(baseName) && g.nama_game !== game.nama_game
+        ).length > 0;
+
+        const thumb = buildGameThumbHtml(game.screenshot_game, baseName);
         
-        if (gameList.length === 0) {
-            gamesListEl.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="fas fa-gamepad fa-3x text-muted"></i>
-                    <h5 class="mt-3">No games found</h5>
-                </div>
-            `;
-            return;
-        }
-        
-        let html = '<div class="row">';
-        
-        gameList.forEach(game => {
-            const platform = game.nama_game.includes('APK') ? 'APK' :
-                            game.nama_game.includes('PC') ? 'PC' : 'Unknown';
+        // ===== BADGE "TERBARU" hanya untuk game pertama (index 0) =====
+        const isNewest = index === 0;
+        const newBadge = isNewest ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">TERBARU</span>' : '';
 
-            let baseName = game.nama_game;
-            const versionMatch = game.nama_game.match(/\[(v\d+\.\d+(\.\d+)?)\]/);
-            const version = versionMatch ? versionMatch[1] : '';
+        html += `
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card game-item position-relative" onclick="showGameDetail('${game.id}', ${hasMultipleVersions})">
+                    ${newBadge}
+                    <div class="card-header bg-success text-white">
+                        <i class="fas fa-gamepad me-1"></i> ${platform}
+                        ${hasMultipleVersions ? '<span class="badge bg-warning float-end">Multiple Versions</span>' : ''}
+                    </div>
 
-            if (version) baseName = baseName.replace(`[${version}]`, '').trim();
-            baseName = baseName.replace(' APK', '').replace(' PC', '').trim();
+                    ${thumb}
 
-            const hasMultipleVersions = games.filter(g =>
-                g.nama_game.includes(baseName) && g.nama_game !== game.nama_game
-            ).length > 0;
-
-            const thumb = buildGameThumbHtml(game.screenshot_game, baseName);
-
-            html += `
-                <div class="col-md-4 col-lg-3 mb-4">
-                    <div class="card game-item" onclick="showGameDetail('${game.id}', ${hasMultipleVersions})">
-                        <div class="card-header bg-success text-white">
-                            <i class="fas fa-gamepad me-1"></i> ${platform}
-                            ${hasMultipleVersions ? '<span class="badge bg-warning float-end">Multiple Versions</span>' : ''}
-                        </div>
-
-                        ${thumb}
-
-                        <div class="card-body">
-                            <h6 class="card-title">${baseName}</h6>
-                            ${version ? `<p class="small text-muted mb-1"><i class="fas fa-code-branch"></i> ${version}</p>` : ''}
-                            <p class="card-text small">
-                                <i class="fas fa-weight-hanging"></i> ${game.ukuran_game || 'Unknown size'}<br>
-                                <i class="fas fa-tags"></i> ${game.category || 'No category'}
-                            </p>
-                            ${!currentUser ? `<small class="text-warning"><i class="fas fa-info-circle"></i> Login to unlock premium</small>` : ''}
-                        </div>
+                    <div class="card-body">
+                        <h6 class="card-title">${baseName}</h6>
+                        ${version ? `<p class="small text-muted mb-1"><i class="fas fa-code-branch"></i> ${version}</p>` : ''}
+                        <p class="card-text small">
+                            <i class="fas fa-weight-hanging"></i> ${game.ukuran_game || 'Unknown size'}<br>
+                            <i class="fas fa-tags"></i> ${game.category || 'No category'}
+                        </p>
+                        ${!currentUser ? `<small class="text-warning"><i class="fas fa-info-circle"></i> Login to unlock premium</small>` : ''}
                     </div>
                 </div>
-            `;
-        });
-        
-        html += '</div>';
-        gamesListEl.innerHTML = html;
-    }
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    gamesListEl.innerHTML = html;
+}
 
     // Build game thumbnail HTML
-    function buildGameThumbHtml(thumbnailUrl, altText) {
-        const url = normalizeImgUrl(thumbnailUrl);
-
-        if (!url) {
-            return `
-                <div class="game-thumb-wrap is-fallback">
-                    <img alt="${altText || 'Game thumbnail'}">
-                    <div class="game-thumb-fallback">If thumbnail are not available, try using a VPN</div>
-                </div>
-            `;
-        }
-
+function buildGameThumbHtml(thumbnailUrl, altText) {
+    const originalUrl = normalizeImgUrl(thumbnailUrl);
+    
+    if (!originalUrl) {
         return `
-            <div class="game-thumb-wrap">
-                <img
-                    src="${url}"
-                    alt="${altText || 'Game thumbnail'}"
-                    loading="lazy"
-                    onerror="handleGameThumbError(this)"
-                >
-                <div class="game-thumb-fallback">If thumbnails are not available, try using a VPN</div>
+            <div class="game-thumb-wrap is-fallback">
+                <img alt="${altText || 'Game thumbnail'}">
+                <div class="game-thumb-fallback">If thumbnail are not available, try using a VPN</div>
             </div>
         `;
     }
+    
+    // Gunakan proxy URL
+    const proxyUrl = getProxyImageUrl(originalUrl, 300, 200);
+    
+    return `
+        <div class="game-thumb-wrap">
+            <img
+                src="${proxyUrl}"
+                alt="${altText || 'Game thumbnail'}"
+                loading="lazy"
+                onerror="handleGameThumbError(this)"
+            >
+            <div class="game-thumb-fallback">If thumbnails are not available, try using a VPN</div>
+        </div>
+    `;
+}
 
     function handleGameThumbError(imgEl) {
         const wrap = imgEl?.closest?.('.game-thumb-wrap');
@@ -3060,23 +3191,24 @@ function displayVideos(videoList) {
         }
 
         // Build screenshots HTML
-        let screenshotsHtml = '';
-        if (screenshots.length > 0) {
-            screenshotsHtml = `
-                <h5 class="mt-4"><i class="fas fa-camera"></i> Screenshots:</h5>
-                <div class="screenshot-grid">
-            `;
+let screenshotsHtml = '';
+if (screenshots.length > 0) {
+    screenshotsHtml = `
+        <h5 class="mt-4"><i class="fas fa-camera"></i> Screenshots:</h5>
+        <div class="screenshot-grid">
+    `;
 
-            screenshots.forEach((url, index) => {
-                screenshotsHtml += `
-                    <img src="${url}" class="screenshot-img" alt="Screenshot ${index + 1}"
-                        onclick="viewScreenshot(${JSON.stringify(url)})"
-                        onerror="this.style.display='none'">
-                `;
-            });
+    screenshots.forEach((url, index) => {
+        const proxyUrl = getProxyImageUrl(url, 150, 120);
+        screenshotsHtml += `
+            <img src="${proxyUrl}" class="screenshot-img" alt="Screenshot ${index + 1}"
+                onclick="viewScreenshot(${JSON.stringify(url)})"
+                onerror="this.style.display='none'">
+        `;
+    });
 
-            screenshotsHtml += '</div>';
-        }
+    screenshotsHtml += '</div>';
+}
 
         // Render modal content
         modalContent.innerHTML = `
@@ -3195,48 +3327,48 @@ function displayStreaming(list) {
     let html = '<div class="row">';
 
     list.forEach((item, index) => {
-        const thumb = item.thumbnail || 'https://via.placeholder.com/300x180?text=Streaming';
+        // Gunakan proxy untuk thumbnail streaming
+        const originalThumb = item.thumbnail || '';
+        const proxyThumb = originalThumb ? getProxyImageUrl(originalThumb, 300, 180) :
+            'https://via.placeholder.com/300x180/1e293b/94a3b8?text=Streaming';
+        
         const cat = item.category || 'Uncategorized';
         const title = item.title || 'Untitled';
         const id = item.id;
         
-        // ===== TAMBAHKAN: Ambil view count dari cache =====
         const cacheKey = `streaming_${id}`;
         const viewCount = countCache.data[cacheKey]?.total || 0;
         
-        // ===== TAMBAHKAN BADGE STREAMING TERBARU =====
         const isNewest = index === 0;
         const newBadge = isNewest ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">TERBARU</span>' : '';
         
-        // Encode item data untuk player
         const encoded = encodeURIComponent(JSON.stringify(item)).replace(/'/g, "%27");
 
         // Guest users
         if (!currentUser) {
-            html += `
-                <div class="col-md-4 col-lg-3 mb-4" data-item-id="${id}">
-                    <div class="card streaming-card position-relative">
-                        ${newBadge}
-                        <!-- VIEW COUNT BADGE -->
-                        <div class="position-absolute top-0 end-0 m-2">
-                            <span class="badge bg-dark opacity-75">
-                                <i class="fas fa-eye me-1"></i> 
-                                <span class="view-count">${formatCount(viewCount)}</span>
-                            </span>
-                        </div>
-                        <span class="login-required-badge">Login Required</span>
-                        <img src="${thumb}" class="video-thumbnail" alt="${title}"
-                            onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=Use+VPN+to+load+thumbnail';">
-                        <div class="card-body">
-                            <h6 class="card-title">${title}</h6>
-                            <p class="card-text small text-muted">
-                                <span class="badge-category">${cat}</span>
-                                <span class="ms-2 text-danger"><i class="fas fa-lock"></i> Login Required</span>
-                            </p>
-                        </div>
+ html += `
+            <div class="col-md-4 col-lg-3 mb-4" data-item-id="${id}">
+                <div class="card streaming-card position-relative" onclick="openStreamingPlayer('${encoded}')">
+                    ${newBadge}
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-dark opacity-75">
+                            <i class="fas fa-eye me-1"></i> 
+                            <span class="view-count">${formatCount(viewCount)}</span>
+                        </span>
+                    </div>
+                    <img src="${proxyThumb}" class="video-thumbnail" alt="${title}"
+                        loading="lazy"
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180/1e293b/94a3b8?text=Thumbnail+Error';">
+                    <div class="card-body">
+                        <h6 class="card-title">${title}</h6>
+                        <p class="card-text small text-muted">
+                            <span class="badge-category">${cat}</span>
+                            <span class="ms-2 text-success"><i class="fas fa-check-circle"></i> Premium</span>
+                        </p>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
         } 
         // Logged in users
         else {
