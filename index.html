@@ -193,10 +193,21 @@
             animation: pulse 2s ease infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
+@keyframes pulse {
+    0% { 
+        transform: scale(1); 
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% { 
+        transform: scale(1.05); 
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% { 
+        transform: scale(1); 
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
 
         /* Dark Mode Toggle */
         .theme-toggle {
@@ -1208,14 +1219,158 @@
         }
 
         /* Badge TERBARU untuk game */
-        .game-item .badge.bg-danger.position-absolute {
-            z-index: 5;
-            font-weight: bold;
-            font-size: 0.8rem;
-            padding: 6px 10px;
-            animation: pulse 1.5s infinite;
-        }
+.game-item .new-badge {
+    position: absolute;
+    bottom: 70px; /* Atur sesuai kebutuhan, agar tidak menutupi teks */
+    left: 10px;
+    z-index: 5;
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    animation: pulse 2s infinite;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+/* Badge HOT di TOP-RIGHT (untuk view count) */
+.game-item .hot-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 4;
+}
 
+/* Platform badge tetap di header card */
+.card-header .platform-badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.game-item .badge.bg-danger.position-absolute {
+    z-index: 5;
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 12px;
+    top: 10px;
+    left: 10px;
+    animation: pulse 2s infinite;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+/* Responsive untuk badge TERBARU */
+@media (max-width: 768px) {
+    .game-item .badge.bg-danger.position-absolute {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        top: 5px;
+        left: 5px;
+    }
+}
+/* Responsive untuk badge TERBARU di bawah */
+@media (max-width: 768px) {
+    .game-item .new-badge {
+        bottom: 60px;
+        font-size: 0.7rem;
+        padding: 4px 8px;
+    }
+}
+@media (max-width: 576px) {
+    .game-item .new-badge {
+        bottom: 55px;
+        font-size: 0.65rem;
+        padding: 3px 6px;
+    }
+}
+/* Animation untuk badge TERBARU yang lebih halus */
+@keyframes pulse-gentle {
+    0% { 
+        transform: scale(1); 
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+    }
+    50% { 
+        transform: scale(1.05); 
+        box-shadow: 0 6px 16px rgba(255, 107, 107, 0.6);
+    }
+    100% { 
+        transform: scale(1); 
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+    }
+}
+
+.game-item .new-badge {
+    animation: pulse-gentle 2s ease-in-out infinite;
+    bottom: 35px;
+}
+
+/* Style untuk card game yang lebih baik */
+.game-item .card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.game-item .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Pastikan thumbnail tidak tertutup badge */
+.game-thumb-wrap {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .game-item .new-badge {
+        bottom: 65px;
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+    
+    .game-item .card-title {
+        font-size: 0.95rem;
+        min-height: 42px;
+    }
+}
+
+@media (max-width: 768px) {
+    .game-item .new-badge {
+        bottom: 60px;
+        font-size: 0.7rem;
+        padding: 4px 8px;
+    }
+    
+    .game-item .card-body {
+        padding: 12px;
+    }
+    
+    .game-item .card-title {
+        font-size: 0.9rem;
+        min-height: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .game-item .new-badge {
+        bottom: 55px;
+        font-size: 0.65rem;
+        padding: 3px 6px;
+        left: 8px;
+    }
+    
+    .game-item .hot-badge {
+        top: 8px;
+        right: 8px;
+        font-size: 0.7rem;
+    }
+    
+    .game-item .position-absolute.top-0.end-0 {
+        top: 8px !important;
+        right: 8px !important;
+    }
+}
         /* Animation untuk badge TERBARU */
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -1726,6 +1881,7 @@
     let streamings = [];
     let currentStreamingToUnlock = null;
     let currentStreamingItem = null;
+let urlProcessed = false;
     let authNonce = 0; // naik setiap login/logout, untuk membatalkan request lama
 let countCache = {
   data: {},
@@ -1779,6 +1935,30 @@ document.getElementById('confirmUnlockStreamingBtn').addEventListener('click', f
 });
         
         // Search filters
+        document.getElementById('videoSearch').addEventListener('input', function() {
+            if (this.value === '') {
+                // Reset URL jika search dikosongkan
+                const url = new URL(window.location);
+                url.searchParams.delete('q');
+                window.history.pushState({}, '', url.toString());
+            }
+        });
+
+        document.getElementById('gameSearch').addEventListener('input', function() {
+            if (this.value === '') {
+                const url = new URL(window.location);
+                url.searchParams.delete('q');
+                window.history.pushState({}, '', url.toString());
+            }
+        });
+
+        document.getElementById('streamingSearch').addEventListener('input', function() {
+            if (this.value === '') {
+                const url = new URL(window.location);
+                url.searchParams.delete('q');
+                window.history.pushState({}, '', url.toString());
+            }
+        });
         document.getElementById('videoSearch').addEventListener('input', filterVideos);
         document.getElementById('videoCategoryFilter').addEventListener('change', filterVideos);
         document.getElementById('gameSearch').addEventListener('input', filterGames);
@@ -1819,6 +1999,7 @@ document.getElementById('confirmUnlockStreamingBtn').addEventListener('click', f
         initializeFromUrl();
         loadVideos();
         loadAllViewCounts();
+    setupNewGameChecker();
     });
 
 
@@ -1862,24 +2043,49 @@ function addClearSearchButtons() {
 }
     // Initialize from URL parameters
 function initializeFromUrl() {
+    if (urlProcessed) return;
+    
     const params = getUrlParams();
     
-    if (params.q) {
-        const searchQuery = params.q.replace(/\+/g, ' ');
-        
-        // Determine which tab to open based on hash
-        if (params.hash === 'games') {
-            switchTab('games', searchQuery);
-        } else if (params.hash === 'streaming') {
-            switchTab('streaming', searchQuery);
-        } else {
-            // Default to videos
-            switchTab('videos', searchQuery);
-        }
-    } else if (params.hash) {
-        // Just switch tab without search
-        switchTab(params.hash);
+    if (!params.q && !params.hash) {
+        urlProcessed = true;
+        return;
     }
+    
+    const searchQuery = params.q ? params.q.replace(/\+/g, ' ') : '';
+    const targetTab = params.hash || 'videos';
+    
+    // Switch tab dulu (visual)
+    switchTab(targetTab, null, true); // Parameter ketiga = skipSearch
+    
+    // Tunggu data, lalu apply search
+    const checkDataAndApplySearch = () => {
+        let dataArray = [];
+        
+        if (targetTab === 'games') dataArray = games;
+        else if (targetTab === 'videos') dataArray = videos;
+        else if (targetTab === 'streaming') dataArray = streamings;
+        
+        if (dataArray.length > 0) {
+            if (searchQuery) {
+                const searchInput = document.getElementById(`${targetTab}Search`);
+                if (searchInput) {
+                    searchInput.value = searchQuery;
+                    
+                    // Panggil filter sesuai tab
+                    if (targetTab === 'games') filterGames();
+                    else if (targetTab === 'videos') filterVideos();
+                    else if (targetTab === 'streaming') filterStreaming();
+                }
+            }
+            urlProcessed = true;
+        } else {
+            setTimeout(checkDataAndApplySearch, 200);
+        }
+    };
+    
+    // Tunggu 500ms dulu untuk loading data
+    setTimeout(checkDataAndApplySearch, 500);
 }
 function getUrlParams() {
     const params = {};
@@ -2080,7 +2286,20 @@ function updateViewCountUI(type, itemId) {
 // Function untuk preload counts saat halaman dimuat
 async function loadAllViewCounts() {
   try {
-    const response = await fetch(`${COUNT_API_URL}?action=getAllCounts`);
+    // Gunakan timeout untuk menghindari request terlalu lama
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
+    
+    const response = await fetch(`${COUNT_API_URL}?action=getAllCounts`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
     const result = await response.json();
     
     if (result.status === 'success') {
@@ -2101,7 +2320,13 @@ async function loadAllViewCounts() {
       updateAllViewCountsUI();
     }
   } catch (error) {
-    console.error('Error loading view counts:', error);
+    console.warn('Warning: Failed to load view counts. Using fallback.', error);
+    // Gunakan data kosong sebagai fallback
+    countCache.data = {};
+    countCache.lastUpdated = Date.now();
+    
+    // Tampilkan semua view count sebagai 0
+    updateAllViewCountsUI();
   }
 }
 
@@ -2611,36 +2836,28 @@ async function loadVideos() {
         if (result.status === 'success') {
             videos = result.data || [];
             
-            // ===== PERBAIKAN: Urutkan video terbaru dulu =====
-            // Asumsi: ID (row) lebih tinggi = video lebih baru
+            // Urutkan video terbaru dulu
             videos.sort((a, b) => {
-                // Coba konversi ke number
                 const idA = parseInt(a.row || a.id || 0);
                 const idB = parseInt(b.row || b.id || 0);
-                
-                // Urutkan dari tinggi ke rendah (terbaru ke terlama)
                 return idB - idA;
             });
-            
-            // Atau jika ada timestamp:
-            // videos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
             displayVideos(videos);
             populateCategoryFilter();
             
-            // Tampilkan notifikasi jumlah video terbaru
-            if (videos.length > 0) {
-                const newestVideo = videos[0];
-                console.log(`Video terbaru: ${newestVideo.nama_video} (ID: ${newestVideo.row})`);
-            }
+            // Cek URL parameters setelah videos selesai di-load
+            setTimeout(() => {
+                const params = getUrlParams();
+                if (params.hash === 'videos' && params.q) {
+                    const searchQuery = params.q.replace(/\+/g, ' ');
+                    document.getElementById('videoSearch').value = searchQuery;
+                    filterVideos();
+                }
+            }, 300);
+            
         } else {
             showToast('error', result.message || 'Failed to load videos');
-            document.getElementById('videosList').innerHTML = `
-                <div class="text-center py-5">
-                    <i class="fas fa-video-slash fa-3x text-muted"></i>
-                    <h5 class="mt-3">Failed to load videos</h5>
-                </div>
-            `;
         }
     } catch (error) {
         console.error('Error loading videos:', error);
@@ -2934,36 +3151,98 @@ function displayVideoDetail(video) {
     }
 
     // Load games
-    async function loadGames() {
-        showLoader(true, 'gamesList');
+async function loadGames() {
+    showLoader(true, 'gamesList');
+    
+    try {
+        const response = await fetch(APKSGI_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'action=getGames'
+        });
         
-        try {
-            const response = await fetch(APKSGI_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'action=getGames'
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            games = result.data || [];
+            
+            // Urutkan dari terbaru ke terlama berdasarkan timestamp
+            games.sort((a, b) => {
+                // Prioritaskan yang masih "terbaru" (dalam 24 jam)
+                const aIsNew = isGameNew(a.timestamp);
+                const bIsNew = isGameNew(b.timestamp);
+                
+                if (aIsNew && !bIsNew) return -1;
+                if (!aIsNew && bIsNew) return 1;
+                
+                // Jika sama-sama terbaru atau sama-sama lama, urutkan berdasarkan timestamp
+                const timeA = a.timestamp_ms || new Date(a.timestamp || 0).getTime();
+                const timeB = b.timestamp_ms || new Date(b.timestamp || 0).getTime();
+                return timeB - timeA; // Terbaru dulu
             });
             
-            const result = await response.json();
+            displayGames(games);
+            populateGameCategoryFilter();
             
-            if (result.status === 'success') {
-                games = result.data || [];
-                displayGames(games);
-                populateGameCategoryFilter();
-            } else {
-                showToast('error', 'Failed to load games');
-            }
-        } catch (error) {
-            showToast('error', 'Network error loading games');
-            console.error('Error loading games:', error);
-        } finally {
-            showLoader(false, 'gamesList');
+            // Cek URL parameters setelah games selesai di-load
+            setTimeout(() => {
+                const params = getUrlParams();
+                if (params.hash === 'games' && params.q) {
+                    const searchQuery = params.q.replace(/\+/g, ' ');
+                    document.getElementById('gameSearch').value = searchQuery;
+                    filterGames();
+                }
+            }, 300);
+            
+        } else {
+            showToast('error', 'Failed to load games');
         }
+    } catch (error) {
+        showToast('error', 'Network error loading games');
+        console.error('Error loading games:', error);
+    } finally {
+        showLoader(false, 'gamesList');
     }
+}
+// Auto-refresh status TERBARU setiap jam
+function setupNewGameChecker() {
+    // Cek setiap 1 jam untuk update status TERBARU
+    setInterval(() => {
+        if (games.length > 0) {
+            // Filter ulang games untuk update badge TERBARU
+            displayGames(games);
+        }
+    }, 3600000); // 1 jam
+    
+    // Cek juga saat user kembali ke tab
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && games.length > 0) {
+            // Refresh display jika user kembali ke tab
+            displayGames(games);
+        }
+    });
+}
 
-    // Display games
+// Tambahkan fungsi untuk menentukan apakah game "terbaru" (ditambahkan dalam 24 jam terakhir)
+function isGameNew(timestamp) {
+    if (!timestamp) return false;
+    
+    try {
+        const gameDate = new Date(timestamp);
+        const now = new Date();
+        const hoursDiff = Math.abs(now - gameDate) / (1000 * 60 * 60);
+        
+        // Jika game ditambahkan kurang dari 24 jam yang lalu
+        return hoursDiff < 24;
+    } catch (e) {
+        console.error('Error parsing timestamp:', timestamp, e);
+        return false;
+    }
+}
+
+// Modifikasi fungsi displayGames untuk menambahkan badge TERBARU
 function displayGames(gameList) {
     const gamesListEl = document.getElementById('gamesList');
     
@@ -2972,15 +3251,28 @@ function displayGames(gameList) {
             <div class="text-center py-5">
                 <i class="fas fa-gamepad fa-3x text-muted"></i>
                 <h5 class="mt-3">No games found</h5>
+                <p class="text-muted">Try a different search term</p>
             </div>
         `;
         return;
     }
     
+    // Urutkan berdasarkan yang terbaru
+    const sortedGames = [...gameList].sort((a, b) => {
+        const aIsNew = isGameNew(a.timestamp);
+        const bIsNew = isGameNew(b.timestamp);
+        
+        if (aIsNew && !bIsNew) return -1;
+        if (!aIsNew && bIsNew) return 1;
+        
+        const idA = parseInt(a.id || a.row || 0);
+        const idB = parseInt(b.id || b.row || 0);
+        return idB - idA;
+    });
+    
     let html = '<div class="row">';
     
-    // ===== PERUBAHAN: Tampilkan game terbaru dengan badge "TERBARU" =====
-    gameList.forEach((game, index) => {
+    sortedGames.forEach((game) => {
         const platform = game.nama_game.includes('APK') ? 'APK' :
                         game.nama_game.includes('PC') ? 'PC' : 'Unknown';
 
@@ -2997,29 +3289,58 @@ function displayGames(gameList) {
 
         const thumb = buildGameThumbHtml(game.screenshot_game, baseName);
         
-        // ===== BADGE "TERBARU" hanya untuk game pertama (index 0) =====
-        const isNewest = index === 0;
-        const newBadge = isNewest ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">TERBARU</span>' : '';
-
+        // Tentukan apakah game ini "terbaru" (dalam 24 jam)
+        const isNewGame = isGameNew(game.timestamp);
+        
+        // Badge "TERBARU" di BOTTOM-LEFT (di atas teks deskripsi)
+        const newBadge = isNewGame ? 
+            '<span class="new-badge"><i class="fas fa-star me-1"></i>TERBARU</span>' : 
+            '';
+        
+        // Tambahkan view count jika ada
+        const cacheKey = `games_${game.id}`;
+        const viewCount = countCache.data[cacheKey]?.total || 0;
+        
+        // Badge HOT untuk game populer (di top-right)
+        const hotBadge = viewCount > 100 ? 
+            '<span class="badge bg-warning hot-badge"><i class="fas fa-fire me-1"></i>HOT</span>' : 
+            '';
+        
         html += `
-            <div class="col-md-4 col-lg-3 mb-4">
-                <div class="card game-item position-relative" onclick="showGameDetail('${game.id}', ${hasMultipleVersions})">
+            <div class="col-md-4 col-lg-3 mb-4" data-item-id="${game.id}">
+                <div class="card game-item position-relative h-100" onclick="showGameDetail('${game.id}', ${hasMultipleVersions})">
+                    ${hotBadge}
                     ${newBadge}
-                    <div class="card-header bg-success text-white">
-                        <i class="fas fa-gamepad me-1"></i> ${platform}
-                        ${hasMultipleVersions ? '<span class="badge bg-warning float-end">Multiple Versions</span>' : ''}
+                    
+                    <!-- VIEW COUNT BADGE di samping HOT badge -->
+                    <div class="position-absolute top-0 end-0 m-2" style="z-index: 4;">
+                        <span class="badge bg-dark opacity-75">
+                            <i class="fas fa-eye me-1"></i> 
+                            <span class="view-count">${formatCount(viewCount)}</span>
+                        </span>
+                    </div>
+                    
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-gamepad me-1"></i> 
+                            <span class="platform-badge">${platform}</span>
+                        </div>
+                        ${hasMultipleVersions ? '<span class="badge bg-warning">Multiple Versions</span>' : ''}
                     </div>
 
                     ${thumb}
 
-                    <div class="card-body">
-                        <h6 class="card-title">${baseName}</h6>
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title" style="min-height: 48px;">${baseName}</h6>
                         ${version ? `<p class="small text-muted mb-1"><i class="fas fa-code-branch"></i> ${version}</p>` : ''}
-                        <p class="card-text small">
+                        <p class="card-text small mt-auto">
                             <i class="fas fa-weight-hanging"></i> ${game.ukuran_game || 'Unknown size'}<br>
                             <i class="fas fa-tags"></i> ${game.category || 'No category'}
                         </p>
-                        ${!currentUser ? `<small class="text-warning"><i class="fas fa-info-circle"></i> Login to unlock premium</small>` : ''}
+                        <div class="mt-2">
+                            ${isNewGame ? '<small class="text-success d-block"><i class="fas fa-clock me-1"></i>Baru ditambahkan</small>' : ''}
+                            ${!currentUser ? '<small class="text-warning"><i class="fas fa-info-circle me-1"></i> Login untuk akses premium</small>' : ''}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3382,7 +3703,7 @@ async function loadStreaming() {
         if (result.status === 'success') {
             const raw = result.data || [];
             
-            // Sort by ID descending (terbaru dulu)
+            // Sort by ID descending
             raw.sort((a, b) => {
                 const idA = parseInt(a.row || a.id || 0);
                 const idB = parseInt(b.row || b.id || 0);
@@ -3397,33 +3718,28 @@ async function loadStreaming() {
                 stream_url: (v.link_video || '').toString().trim(),
                 ad_link: (v.link_iklan || '').toString().trim(),
                 durasi: v.durasi || '',
-                // Tambahkan data asli untuk kompatibilitas
                 original_data: v
             }));
 
             populateStreamingCategoryFilter();
             displayStreaming(streamings);
             
-            console.log(`Loaded ${streamings.length} streaming videos, newest ID: ${streamings[0]?.id || 'N/A'}`);
+            // Cek URL parameters setelah streaming selesai di-load
+            setTimeout(() => {
+                const params = getUrlParams();
+                if (params.hash === 'streaming' && params.q) {
+                    const searchQuery = params.q.replace(/\+/g, ' ');
+                    document.getElementById('streamingSearch').value = searchQuery;
+                    filterStreaming();
+                }
+            }, 300);
+            
         } else {
-            showToast('error', result.message || 'Failed to load streaming list');
-            document.getElementById('streamingList').innerHTML = `
-                <div class="text-center py-5">
-                    <i class="fas fa-triangle-exclamation fa-3x text-muted"></i>
-                    <h5 class="mt-3">Streaming list unavailable</h5>
-                </div>
-            `;
+            showToast('error', 'Failed to load streaming list');
         }
     } catch (e) {
         console.error('Load streaming error:', e);
         showToast('error', 'Network error loading streaming');
-        document.getElementById('streamingList').innerHTML = `
-            <div class="text-center py-5">
-                <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
-                <h5 class="mt-3">Failed to load streaming</h5>
-                <p class="text-muted">Please check your connection</p>
-            </div>
-        `;
     } finally {
         showLoader(false, 'streamingList');
     }
@@ -4256,43 +4572,69 @@ function filterGames() {
     const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
     const platformFilter = document.getElementById('gamePlatformFilter').value;
     const categoryFilter = document.getElementById('gameCategoryFilter').value;
+
+    let filteredGames = games;
+
+    if (searchTerm) {
+        filteredGames = filteredGames.filter(game =>
+            (game.nama_game || '').toLowerCase().includes(searchTerm) ||
+            (game.category || '').toLowerCase().includes(searchTerm)
+        );
+    }
+
+    if (platformFilter) {
+        filteredGames = filteredGames.filter(game => {
+            if (platformFilter === 'APK') return (game.nama_game || '').includes('APK');
+            if (platformFilter === 'PC') return (game.nama_game || '').includes('PC');
+            return true;
+        });
+    }
+
+    if (categoryFilter) {
+        const selected = categoryFilter.toLowerCase();
+        filteredGames = filteredGames.filter(game => {
+            const cats = (game.category || '')
+                .split(',')
+                .map(x => x.trim().toLowerCase())
+                .filter(Boolean);
+            return cats.includes(selected);
+        });
+    }
+
+    // ===== FIX: Pastikan urutan tetap dari terbaru ke terlama setelah filter =====
+    filteredGames.sort((a, b) => {
+        const idA = parseInt(a.id || a.row || 0);
+        const idB = parseInt(b.id || b.row || 0);
+        return idB - idA;
+    });
+
+    displayGames(filteredGames);
     
     // Update URL
     updateUrlParams({
         q: searchTerm,
         hash: 'games'
     });
-
-        let filteredGames = games;
-
-        if (searchTerm) {
-            filteredGames = filteredGames.filter(game =>
-                (game.nama_game || '').toLowerCase().includes(searchTerm) ||
-                (game.category || '').toLowerCase().includes(searchTerm)
-            );
-        }
-
-        if (platformFilter) {
-            filteredGames = filteredGames.filter(game => {
-                if (platformFilter === 'APK') return (game.nama_game || '').includes('APK');
-                if (platformFilter === 'PC') return (game.nama_game || '').includes('PC');
-                return true;
-            });
-        }
-
-        if (categoryFilter) {
-            const selected = categoryFilter.toLowerCase();
-            filteredGames = filteredGames.filter(game => {
-                const cats = (game.category || '')
-                    .split(',')
-                    .map(x => x.trim().toLowerCase())
-                    .filter(Boolean);
-                return cats.includes(selected);
-            });
-        }
-
-        displayGames(filteredGames);
+    
+    // Show message jika hasil filter kosong
+    if (filteredGames.length === 0) {
+        setTimeout(() => {
+            const gamesListEl = document.getElementById('gamesList');
+            if (gamesListEl) {
+                gamesListEl.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted"></i>
+                        <h5 class="mt-3">No games found for "${searchTerm}"</h5>
+                        <p class="text-muted">Try a different search term or clear filters</p>
+                        <button class="btn btn-outline-secondary mt-3" onclick="clearGameFilters()">
+                            <i class="fas fa-times"></i> Clear All Filters
+                        </button>
+                    </div>
+                `;
+            }
+        }, 10);
     }
+}
 
     function populateStreamingCategoryFilter() {
         const sel = document.getElementById('streamingCategoryFilter');
@@ -4337,7 +4679,7 @@ function filterStreaming() {
     }
 
     // Switch tab
-function switchTab(tabName, searchQuery = null) {
+function switchTab(tabName, searchQuery = null, skipSearch = false) {
     const tab = document.querySelector(`#${tabName}-tab`);
     if (!tab) {
         console.error('Tab not found:', `#${tabName}-tab`);
@@ -4356,7 +4698,7 @@ function switchTab(tabName, searchQuery = null) {
         document.getElementById('navVideos').classList.add('active');
         if (videos.length === 0) loadVideos();
         
-        if (searchQuery) {
+        if (searchQuery && !skipSearch) {
             document.getElementById('videoSearch').value = searchQuery;
             filterVideos();
         }
@@ -4364,7 +4706,7 @@ function switchTab(tabName, searchQuery = null) {
         document.getElementById('navGames').classList.add('active');
         if (games.length === 0) loadGames();
         
-        if (searchQuery) {
+        if (searchQuery && !skipSearch) {
             document.getElementById('gameSearch').value = searchQuery;
             filterGames();
         }
@@ -4372,17 +4714,19 @@ function switchTab(tabName, searchQuery = null) {
         document.getElementById('navStreaming').classList.add('active');
         if (streamings.length === 0) loadStreaming();
         
-        if (searchQuery) {
+        if (searchQuery && !skipSearch) {
             document.getElementById('streamingSearch').value = searchQuery;
             filterStreaming();
         }
     }
     
-    // Update URL
-    updateUrlParams({
-        q: searchQuery || '',
-        hash: tabName
-    });
+    // Update URL hanya jika bukan dari initialize
+    if (!skipSearch) {
+        updateUrlParams({
+            q: searchQuery || '',
+            hash: tabName
+        });
+    }
 }
 
     // Show loader
