@@ -1755,9 +1755,20 @@ const IMAGE_PROXY_URL = 'https://images.weserv.nl/';
         document.getElementById('guestLoginBtn').addEventListener('click', showLoginModal);
         document.getElementById('logoutBtn').addEventListener('click', handleLogout);
         
-        document.getElementById('navVideos').addEventListener('click', () => switchTab('videos'));
-        document.getElementById('navGames').addEventListener('click', () => switchTab('games'));
-        document.getElementById('navStreaming').addEventListener('click', () => switchTab('streaming'));
+        document.getElementById('navVideos').addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab('videos');
+        });
+
+        document.getElementById('navGames').addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab('games');
+        });
+
+        document.getElementById('navStreaming').addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab('streaming');
+        });
         
         document.getElementById('confirmUnlockBtn').addEventListener('click', confirmUnlockVideo);
         document.getElementById('confirmUnlockGameBtn').addEventListener('click', confirmUnlockGameLink);
@@ -1804,9 +1815,110 @@ document.getElementById('confirmUnlockStreamingBtn').addEventListener('click', f
         });
         
         // Load initial content
+        addClearSearchButtons();
+        initializeFromUrl();
         loadVideos();
         loadAllViewCounts();
     });
+
+
+// ===== URL PARAMETER HANDLING =====
+function addClearSearchButtons() {
+    // Add to video search
+    const videoSearchContainer = document.querySelector('#videoSearch').parentElement;
+    const videoClearBtn = document.createElement('button');
+    videoClearBtn.className = 'btn btn-outline-secondary';
+    videoClearBtn.innerHTML = '<i class="fas fa-times"></i>';
+    videoClearBtn.type = 'button';
+    videoClearBtn.onclick = () => {
+        document.getElementById('videoSearch').value = '';
+        filterVideos();
+    };
+    videoSearchContainer.appendChild(videoClearBtn);
+    
+    // Add to game search
+    const gameSearchContainer = document.querySelector('#gameSearch').parentElement;
+    const gameClearBtn = document.createElement('button');
+    gameClearBtn.className = 'btn btn-outline-secondary';
+    gameClearBtn.innerHTML = '<i class="fas fa-times"></i>';
+    gameClearBtn.type = 'button';
+    gameClearBtn.onclick = () => {
+        document.getElementById('gameSearch').value = '';
+        filterGames();
+    };
+    gameSearchContainer.appendChild(gameClearBtn);
+    
+    // Add to streaming search
+    const streamingSearchContainer = document.querySelector('#streamingSearch').parentElement;
+    const streamingClearBtn = document.createElement('button');
+    streamingClearBtn.className = 'btn btn-outline-secondary';
+    streamingClearBtn.innerHTML = '<i class="fas fa-times"></i>';
+    streamingClearBtn.type = 'button';
+    streamingClearBtn.onclick = () => {
+        document.getElementById('streamingSearch').value = '';
+        filterStreaming();
+    };
+    streamingSearchContainer.appendChild(streamingClearBtn);
+}
+    // Initialize from URL parameters
+function initializeFromUrl() {
+    const params = getUrlParams();
+    
+    if (params.q) {
+        const searchQuery = params.q.replace(/\+/g, ' ');
+        
+        // Determine which tab to open based on hash
+        if (params.hash === 'games') {
+            switchTab('games', searchQuery);
+        } else if (params.hash === 'streaming') {
+            switchTab('streaming', searchQuery);
+        } else {
+            // Default to videos
+            switchTab('videos', searchQuery);
+        }
+    } else if (params.hash) {
+        // Just switch tab without search
+        switchTab(params.hash);
+    }
+}
+function getUrlParams() {
+    const params = {};
+    const queryString = window.location.search.substring(1);
+    const pairs = queryString.split('&');
+    
+    for (let i = 0; i < pairs.length; i++) {
+        const pair = pairs[i].split('=');
+        if (pair[0]) {
+            params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+        }
+    }
+    
+    // Handle hash fragment
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+        params.hash = hash;
+    }
+    
+    return params;
+}
+
+function updateUrlParams(params) {
+    const url = new URL(window.location);
+    
+    // Update query parameters
+    if (params.q) {
+        url.searchParams.set('q', params.q);
+    } else {
+        url.searchParams.delete('q');
+    }
+    
+    // Update hash
+    if (params.hash) {
+        url.hash = params.hash;
+    }
+    
+    window.history.pushState({}, '', url.toString());
+}
 
 function loadImageWithProxy(imgElement, originalUrl, fallbackText = 'Image not available') {
     if (!originalUrl || !imgElement) return;
@@ -4077,9 +4189,15 @@ function setStreamingVideoUnlocked(streamId) {
         });
     }
 
-    function filterVideos() {
-        const searchTerm = document.getElementById('videoSearch').value.toLowerCase();
-        const categoryFilter = document.getElementById('videoCategoryFilter').value;
+function filterVideos() {
+    const searchTerm = document.getElementById('videoSearch').value.toLowerCase();
+    const categoryFilter = document.getElementById('videoCategoryFilter').value;
+    
+    // Update URL
+    updateUrlParams({
+        q: searchTerm,
+        hash: 'videos'
+    });
         
         let filteredVideos = videos;
         
@@ -4134,10 +4252,16 @@ function setStreamingVideoUnlocked(streamId) {
             });
     }
 
-    function filterGames() {
-        const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
-        const platformFilter = document.getElementById('gamePlatformFilter').value;
-        const categoryFilter = document.getElementById('gameCategoryFilter').value;
+function filterGames() {
+    const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
+    const platformFilter = document.getElementById('gamePlatformFilter').value;
+    const categoryFilter = document.getElementById('gameCategoryFilter').value;
+    
+    // Update URL
+    updateUrlParams({
+        q: searchTerm,
+        hash: 'games'
+    });
 
         let filteredGames = games;
 
@@ -4187,9 +4311,15 @@ function setStreamingVideoUnlocked(streamId) {
         });
     }
 
-    function filterStreaming() {
-        const q = (document.getElementById('streamingSearch').value || '').toLowerCase();
-        const cat = document.getElementById('streamingCategoryFilter').value;
+function filterStreaming() {
+    const q = (document.getElementById('streamingSearch').value || '').toLowerCase();
+    const cat = document.getElementById('streamingCategoryFilter').value;
+    
+    // Update URL
+    updateUrlParams({
+        q: q,
+        hash: 'streaming'
+    });
 
         let filtered = streamings;
 
@@ -4207,31 +4337,53 @@ function setStreamingVideoUnlocked(streamId) {
     }
 
     // Switch tab
-    function switchTab(tabName) {
-        const tab = document.querySelector(`#${tabName}-tab`);
-        if (!tab) {
-            console.error('Tab not found:', `#${tabName}-tab`);
-            return;
+function switchTab(tabName, searchQuery = null) {
+    const tab = document.querySelector(`#${tabName}-tab`);
+    if (!tab) {
+        console.error('Tab not found:', `#${tabName}-tab`);
+        return;
+    }
+
+    const bsTab = new bootstrap.Tab(tab);
+    bsTab.show();
+
+    // Update active nav
+    document.getElementById('navVideos').classList.remove('active');
+    document.getElementById('navGames').classList.remove('active');
+    document.getElementById('navStreaming').classList.remove('active');
+
+    if (tabName === 'videos') {
+        document.getElementById('navVideos').classList.add('active');
+        if (videos.length === 0) loadVideos();
+        
+        if (searchQuery) {
+            document.getElementById('videoSearch').value = searchQuery;
+            filterVideos();
         }
-
-        const bsTab = new bootstrap.Tab(tab);
-        bsTab.show();
-
-        document.getElementById('navVideos').classList.remove('active');
-        document.getElementById('navGames').classList.remove('active');
-        document.getElementById('navStreaming').classList.remove('active');
-
-        if (tabName === 'videos') {
-            document.getElementById('navVideos').classList.add('active');
-            if (videos.length === 0) loadVideos();
-        } else if (tabName === 'games') {
-            document.getElementById('navGames').classList.add('active');
-            if (games.length === 0) loadGames();
-        } else if (tabName === 'streaming') {
-            document.getElementById('navStreaming').classList.add('active');
-            if (streamings.length === 0) loadStreaming();
+    } else if (tabName === 'games') {
+        document.getElementById('navGames').classList.add('active');
+        if (games.length === 0) loadGames();
+        
+        if (searchQuery) {
+            document.getElementById('gameSearch').value = searchQuery;
+            filterGames();
+        }
+    } else if (tabName === 'streaming') {
+        document.getElementById('navStreaming').classList.add('active');
+        if (streamings.length === 0) loadStreaming();
+        
+        if (searchQuery) {
+            document.getElementById('streamingSearch').value = searchQuery;
+            filterStreaming();
         }
     }
+    
+    // Update URL
+    updateUrlParams({
+        q: searchQuery || '',
+        hash: tabName
+    });
+}
 
     // Show loader
     function showLoader(show, elementId = null) {
